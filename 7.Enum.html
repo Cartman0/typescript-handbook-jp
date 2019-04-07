@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Enum</h1>
+    <section>
+      <h2>Enums</h2>
+      <p>
+        Enums allow us to define a set of named constants. Using enums can make
+        it easier to document intent, or create a set of distinct cases.
+        TypeScript provides both numeric and string-based enums.
+      </p>
+      <p>
+        列挙型を使用すると、名前付き定数のセットを定義できます。列挙型を使用すると、意図を文書化したり、個別のケースを簡単に作成したりできます。
+        TypeScriptは、数値と文字列の両方の列挙型を提供します。
+      </p>
+
+      <section>
+        <h3>Numeric enums</h3>
+        <p>
+          We’ll first start off with numeric enums, which are probably more
+          familiar if you’re coming from other languages. An enum can be defined
+          using the enum keyword.
+        </p>
+        <p>
+          最初にnumeric
+          enumsから始めましょう。他の言語から来ているのであれば、おそらくもっと慣れ親しんでいるでしょう。
+          enumはenumキーワードを使って定義できます。
+        </p>
+        <pre><code>enum Direction {
+    Up = 1,
+    Down,
+    Left,
+    Right,
+}</code></pre>
+        <p>
+          Above, we have a numeric enum where Up is initialized with 1. All of
+          the following members are auto-incremented from that point on. In
+          other words, Direction.Up has the value 1, Down has 2, Left has 3, and
+          Right has 4.
+        </p>
+        <p>
+          上記では、Upが1で初期化される数値列挙があります。以下のすべてのメンバはその時点から自動的にインクリメントされます。つまり、Direction.Upの値は1、Downの値は2、Leftの値は3、Rightの値は4です。
+        </p>
+        <p>
+          Using an enum is simple: just access any member as a property off of
+          the enum itself, and declare types using the name of the enum:
+        </p>
+        <p>
+          列挙型の使用は簡単です。列挙型自体からプロパティとして任意のメンバーにアクセスし、列挙型の名前を使用して型を宣言するだけです。
+        </p>
+
+        <pre><code>enum Response {
+        No = 0,
+        Yes = 1,
+    }
+    
+    function respond(recipient: string, message: Response): void {
+        // ...
+    }
+    
+    respond("Princess Caroline", Response.Yes)</code></pre>
+
+        <p>
+          Numeric enums can be mixed in computed and constant members (see
+          below). The short story is, enums without initializers either need to
+          be first, or have to come after numeric enums initialized with numeric
+          constants or other constant enum members. In other words, the
+          following isn’t allowed:
+        </p>
+        <p>
+          Numeric
+          enumsは、計算メンバーと定数メンバーに混在させることができます（下記参照）。
+          簡単に言うと、初期化指定子なしの列挙型は、最初にする必要があるか、数値定数または他の定数列挙型メンバーで初期化された数値列挙型の後に来る必要があります。
+          つまり、次のことは許可されていません
+        </p>
+        <pre><code>enum E {
+    A = getSomeValue(),
+    B, // error! 'A' is not constant-initialized, so 'B' needs an initializer
+}</code></pre>
+      </section>
+
+      <section>
+        <h3>String enums</h3>
+        <p>
+          String enums are a similar concept, but have some subtle runtime
+          differences as documented below. In a string enum, each member has to
+          be constant-initialized with a string literal, or with another string
+          enum member.
+        </p>
+        <p>
+          文字列列挙も同様の概念ですが、以下に説明するように、実行時にわずかな違いがいくつかあります。文字列列挙型では、各メンバは文字列リテラルまたは別の文字列列挙型メンバで定数初期化する必要があります。
+        </p>
+        <pre><code>enum Direction {
+    Up = "UP",
+    Down = "DOWN",
+    Left = "LEFT",
+    Right = "RIGHT",
+}</code></pre>
+
+        <p>
+          While string enums don’t have auto-incrementing behavior, string enums
+          have the benefit that they “serialize” well. In other words, if you
+          were debugging and had to read the runtime value of a numeric enum,
+          the value is often opaque - it doesn’t convey any useful meaning on
+          its own (though reverse mapping can often help), string enums allow
+          you to give a meaningful and readable value when your code runs,
+          independent of the name of the enum member itself.
+        </p>
+        <p>
+          文字列enumには自動インクリメント動作はありませんが、文字列enumには「シリアライズ」がうまくいくという利点があります。
+          言い換えれば、もしデバッグしていて数値のenumの実行時の値を読まなければならなかった場合、その値はしばしば不透明です
+          -
+          それ自体では意味のある意味を伝えません（逆マッピングが役に立つことが多いです）、
+          あなたのコードが実行されるとき、enumメンバ自身の名前とは無関係に、意味のある読みやすい値を与えるため。
+        </p>
+      </section>
+
+      <section>
+        <h3>Heterogeneous enums</h3>
+        <p>
+          Technically enums can be mixed with string and numeric members, but
+          it’s not clear why you would ever want to do so:
+        </p>
+        <p>
+          技術的に列挙型は文字列や数値型のメンバと混在させることができますが、なぜそうしたいのか明確ではありません。
+        </p>
+        <pre><code>enum BooleanLikeHeterogeneousEnum {
+    No = 0,
+    Yes = "YES",
+}</code></pre>
+        <p>
+          Unless you’re really trying to take advantage of JavaScript’s runtime
+          behavior in a clever way, it’s advised that you don’t do this.
+        </p>
+        <p>
+          JavaScriptの実行時動作を巧妙に利用しようとしているのでない限り、そうしないことをお勧めします。
+        </p>
+      </section>
+
+      <section>
+        <h3>Computed and constant members 計算メンバと定数メンバ</h3>
+        <p>
+          Each enum member has a value associated with it which can be either
+          constant or computed. An enum member is considered constant if:
+        </p>
+        <p>
+          各enumメンバはそれに関連した値を持ち、それは定数または計算値のどちらかです。以下の場合、列挙型メンバーは定数と見なされます。
+        </p>
+        <ul>
+          <li>
+            <p>
+              It is the first member in the enum and it has no initializer, in
+              which case it’s assigned the value 0:
+            </p>
+            <p>
+              これは列挙型の最初のメンバーであり、初期化子はありません。その場合、値0が割り当てられます。
+            </p>
+            <pre><code>// E.X is constant:
+enum E { X }</code></pre>
+          </li>
+          <li>
+            <p>
+              It does not have an initializer and the preceding enum member was
+              a numeric constant. In this case the value of the current enum
+              member will be the value of the preceding enum member plus one.
+            </p>
+
+            <p>
+              初期化子がなく、先行するenumメンバは数値定数でした。この場合、現在のenumメンバーの値は、直前のenumメンバーの値に1を加えたものになります。
+            </p>
+            <pre><code>// All enum members in 'E1' and 'E2' are constant.
+
+enum E1 { X, Y, Z }
+
+enum E2 {
+    A = 1, B, C
+}</code></pre>
+          </li>
+          <li>
+            <p>
+              The enum member is initialized with a constant enum expression. A
+              constant enum expression is a subset of TypeScript expressions
+              that can be fully evaluated at compile time. An expression is a
+              constant enum expression if it is:
+            </p>
+            <p>
+              enumメンバは定数のenum式で初期化されます。定数のenum式は、コンパイル時に完全に評価できるTypeScript式のサブセットです。次の場合、式は定数のenum式です。
+            </p>
+
+            <ol>
+              <li>
+                a literal enum expression (basically a string literal or a
+                numeric literal)
+                リテラルenum式（基本的には文字列リテラルまたは数値リテラル）
+              </li>
+              <li>
+                a reference to previously defined constant enum member (which
+                can originate from a different enum)
+
+                <p>
+                  以前に定義された定数enumメンバーへの参照（これは異なるenumから発生する可能性があります）
+                </p>
+              </li>
+              <li>
+                a parenthesized constant enum expression
+
+                <p>
+                  かっこで囲まれた定数のenum式
+                </p>
+              </li>
+              <li>
+                one of the +, -, ~ unary operators applied to constant enum
+                expression
+                <p>
+                  +、-、~の単一演算子が割り当てられたEnumの定数式
+                </p>
+              </li>
+              <li>
+                <code
+                  >+、-、*、/、%、
+                  &lt;&lt;、&gt;&gt;、&gt;&gt;&gt;、&、|、^</code
+                >
+                binary operators with constant enum expressions as operands
+
+                <p>
+                  <code
+                    >+、-、*、/、%、
+                    &lt;&lt;、&gt;&gt;、&gt;&gt;&gt;、&、|、^</code
+                  >の二項演算子を含むEnum定数式。
+                  評価されるEnum定数式がNaNまたはInfinityの場合は、コンパイル時にエラーになります。
+                </p>
+              </li>
+            </ol>
+
+            <p>
+              It is a compile time error for constant enum expressions to be
+              evaluated to NaN or Infinity.
+            </p>
+            <p>
+              定数のenum式をNaNまたはInfinityに評価するのはコンパイル時エラーです。
+            </p>
+          </li>
+        </ul>
+        <p>
+          In all other cases enum member is considered computed.
+        </p>
+        <p>
+          他のすべての場合では、enumメンバは計算済みと見なされます。
+        </p>
+
+        <pre><code>enum FileAccess {
+    // constant members
+    None,
+    Read    = 1 << 1,
+    Write   = 1 << 2,
+    ReadWrite  = Read | Write,
+    // computed member
+    G = "123".length
+}</code></pre>
+      </section>
+
+      <section>
+        <h3>
+          Union enums and enum member types 共用体enumおよびenumメンバタイプ
+        </h3>
+        <p>
+          There is a special subset of constant enum members that aren’t
+          calculated: literal enum members. A literal enum member is a constant
+          enum member with no initialized value, or with values that are
+          initialized to
+        </p>
+        <p>
+          計算されない定数のenumメンバーの特別なサブセットがあります。リテラルのenumメンバーです。リテラルのenumメンバーは、初期化された値を持たない、または次の値に初期化された値を持つ定数のenumメンバです。
+        </p>
+        <ul>
+          <li>
+            any string literal (e.g. "foo", "bar, "baz")
+            任意の文字列リテラル（例： "foo"、 "bar、" baz "）
+          </li>
+          <li>
+            any numeric literal (e.g. 1, 100) 任意の数値リテラル（例：1、100）
+          </li>
+          <li>
+            a unary minus applied to any numeric literal (e.g. -1, -100)
+            数値リテラルに適用される単項マイナス（例：-1、-100）
+          </li>
+        </ul>
+        <p>
+          When all members in an enum have literal enum values, some special
+          semantics come to play.
+        </p>
+        <p>
+          enum内のすべてのメンバがリテラルenum値を持っているとき、いくつかの特別な意味論が機能するようになります。
+        </p>
+
+        <p>
+          The first is that enum members also become types as well! For example,
+          we can say that certain members can only have the value of an enum
+          member:
+        </p>
+        <p>
+          1つ目は、enumメンバーも型になるということです。たとえば、特定のメンバーは列挙型メンバーの値しか持てないと言えます。
+        </p>
+        <pre><code>enum ShapeKind {
+    Circle,
+    Square,
+}
+
+interface Circle {
+    kind: ShapeKind.Circle;
+    radius: number;
+}
+
+interface Square {
+    kind: ShapeKind.Square;
+    sideLength: number;
+}
+
+let c: Circle = {
+    kind: ShapeKind.Square,
+    //    ~~~~~~~~~~~~~~~~ Error!
+    radius: 100,
+}</code></pre>
+
+        <p>
+          The other change is that enum types themselves effectively become a
+          union of each enum member. While we haven’t discussed union types yet,
+          all that you need to know is that with union enums, the type system is
+          able to leverage the fact that it knows the exact set of values that
+          exist in the enum itself. Because of that, TypeScript can catch silly
+          bugs where we might be comparing values incorrectly. For example:
+        </p>
+        <p>
+          もう1つの変更は、enum型自体が事実上各enumメンバーの和集合になることです。
+          共用体型についてはまだ説明していませんが、共用体列挙型を使用すると、型システムは、列挙型自体に存在する正確な値のセットを認識できるという事実を活用できるということだけです。
+          そのため、TypeScriptは、値を誤って比較している可能性のある愚かなバグを検出することができます。
+          例えば：
+        </p>
+        <pre><code>enum E {
+    Foo,
+    Bar,
+}
+
+function f(x: E) {
+    if (x !== E.Foo || x !== E.Bar) {
+        //             ~~~~~~~~~~~
+        // Error! Operator '!==' cannot be applied to types 'E.Foo' and 'E.Bar'.
+    }
+}</code></pre>
+        <p>
+          In that example, we first checked whether x was not E.Foo. If that
+          check succeeds, then our || will short-circuit, and the body of the
+          ‘if’ will get run. However, if the check didn’t succeed, then x can
+          only be E.Foo, so it doesn’t make sense to see whether it’s equal to
+          E.Bar.
+        </p>
+        <p>
+          その例では、最初にxがE.Fooではないかどうかを調べました。
+          もしそのチェックが成功したら、私たちの||
+          短絡し、「if」の本体が実行されます。
+          しかし、チェックが成功しなかった場合、xはE.Fooにしかなり得ないので、それがE.Barと等しいかどうかを判断するのは意味がありません。
+        </p>
+      </section>
+
+      <section>
+        <h3>Enums at runtime</h3>
+        <p>
+          Enums are real objects that exist at runtime. For example, the
+          following enum
+        </p>
+        <p>
+          列挙型は実行時に存在する実際のオブジェクトです。例えば、以下のenum
+        </p>
+        <pre><code>enum E {
+    X, Y, Z
+}</code></pre>
+        <p>
+          can actually be passed around to functions
+        </p>
+        <p>
+          実際に関数に渡すことができます
+        </p>
+        <pre><code>function f(obj: { X: number }) {
+    return obj.X;
+}
+
+// Works, since 'E' has a property named 'X' which is a number.
+f(E);</code></pre>
+
+        <section>
+          <h4>Reverse mappings</h4>
+          <p>
+            In addition to creating an object with property names for members,
+            numeric enums members also get a reverse mapping from enum values to
+            enum names. For example, in this example:
+          </p>
+          <p>
+            メンバーのプロパティ名を持つオブジェクトを作成することに加えて、数値のenumメンバーはenum値からenum名への逆マッピングも取得します。たとえば、次の例では
+          </p>
+
+          <pre><code>enum Enum {
+    A
+}
+let a = Enum.A;
+let nameOfA = Enum[a]; // "A"</code></pre>
+
+          <p>
+            TypeScript might compile this down to something like the the
+            following JavaScript:
+          </p>
+          <p>
+            TypeScriptはこれを次のJavaScriptのようなものにコンパイルします。
+          </p>
+
+          <pre><code>var Enum;
+(function (Enum) {
+    Enum[Enum["A"] = 0] = "A";
+})(Enum || (Enum = {}));
+var a = Enum.A;
+var nameOfA = Enum[a]; // "A"</code></pre>
+
+          <p>
+            In this generated code, an enum is compiled into an object that
+            stores both forward (name -> value) and reverse (value -> name)
+            mappings. References to other enum members are always emitted as
+            property accesses and never inlined.
+          </p>
+
+          <p>
+            この生成コードでは、enumは順方向（name - > value）と逆方向（value -
+            &gt;
+            name）の両方のマッピングを格納するオブジェクトにコンパイルされます。他の列挙型メンバへの参照は、常にプロパティアクセスとして発行され、インライン化されることはありません。
+          </p>
+
+          <p>
+            Keep in mind that string enum members do not get a reverse mapping
+            generated at all.
+          </p>
+          <p>
+            文字列のenumメンバーはリバースマッピングをまったく生成しないことに注意してください。
+          </p>
+        </section>
+
+        <section>
+          <h4>const enums</h4>
+          <p>
+            In most cases, enums are a perfectly valid solution. However
+            sometimes requirements are tighter. To avoid paying the cost of
+            extra generated code and additional indirection when accessing enum
+            values, it’s possible to use const enums. Const enums are defined
+            using the const modifier on our enums:
+          </p>
+          <p>
+            ほとんどの場合、列挙型は完全に有効な解決策です。
+            しかし、時には要件が厳しくなります。
+            enum値にアクセスするときに余分な生成コードと追加の間接化のコストを払うのを避けるために、const
+            enumを使うことが可能です。
+            定数enumは、enumのconst修飾子を使って定義されます。
+          </p>
+          <pre><code>const enum Enum {
+    A = 1,
+    B = A * 2
+}</code></pre>
+
+          <p>
+            Const enums can only use constant enum expressions and unlike
+            regular enums they are completely removed during compilation. Const
+            enum members are inlined at use sites. This is possible since const
+            enums cannot have computed members.
+          </p>
+          <p>
+            定数enumは定数enum式しか使用できず、通常のenumとは異なり、コンパイル中に完全に削除されます。定数メンバーは使用サイトでインライン化されます。これは、const
+            enumが計算メンバーを持つことができないために可能です。
+          </p>
+
+          <pre><code>const enum Directions {
+    Up,
+    Down,
+    Left,
+    Right
+}
+
+let directions = [Directions.Up, Directions.Down, Directions.Left, Directions.Right]</code></pre>
+
+          <p>
+            in generated code will become
+          </p>
+          <p>生成されたコードでは</p>
+          <pre><code>var directions = [0 /* Up */, 1 /* Down */, 2 /* Left */, 3 /* Right */];</code></pre>
+        </section>
+      </section>
+
+      <section>
+        <h3>Ambient enums</h3>
+        <p>
+          Ambient enums are used to describe the shape of already existing enum
+          types.
+        </p>
+        <p>
+          アンビエント列挙は、既存の列挙型の形状を記述するために使用されます。
+        </p>
+        <pre><code>declare enum Enum {
+    A = 1,
+    B,
+    C = 2
+}</code></pre>
+        <p>
+          One important difference between ambient and non-ambient enums is
+          that, in regular enums, members that don’t have an initializer will be
+          considered constant if its preceding enum member is considered
+          constant. In contrast, an ambient (and non-const) enum member that
+          does not have initializer is always considered computed.
+        </p>
+        <p>
+          アンビエント列挙と非アンビエント列挙の1つの重要な違いは、通常の列挙では、前の列挙型メンバーが定数と見なされると、
+          初期化子を持たないメンバーも定数と見なされることです。
+          対照的に、イニシャライザを持たないアンビエント（および非const）enumメンバは、常に計算済みと見なされます。
+        </p>
+      </section>
+    </section>
+  </body>
+</html>

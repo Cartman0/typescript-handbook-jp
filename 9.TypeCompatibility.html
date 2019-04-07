@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Type Compatibility Introduction</title>
+  </head>
+  <body>
+    <h1>Type Compatibility 型互換</h1>
+    <section>
+      <h2>Introduction</h2>
+      <p>
+        Type compatibility in TypeScript is based on structural subtyping.
+        Structural typing is a way of relating types based solely on their
+        members. This is in contrast with nominal typing. Consider the following
+        code:
+      </p>
+      <p>
+        TypeScriptでの型の互換性は、構造的部分型(structural
+        subtyping)がもとになります。
+        構造的部分型は、型の結びつけを単にそれらのメンバーをもとにして行う方法です。
+        これは「名目上の型付け(nominal typing)」とは対照的です。
+        次のコードを例に考えてみましょう。
+      </p>
+      <pre><code>interface Named {
+    name: string;
+}
+
+class Person {
+    name: string;
+}
+
+let p: Named;
+// OK, because of structural typing
+p = new Person();</code></pre>
+      <p>
+        In nominally-typed languages like C# or Java, the equivalent code would
+        be an error because the Person class does not explicitly describe itself
+        as being an implementer of the Named interface.
+      </p>
+      <p>
+        C#やJavaのような「名目上の型付け」を行う言語では、
+        Personクラスは、自身がNamedインターフェースを実装していると名言していないため、
+        この等価コードはエラーとなります。
+      </p>
+      <p>
+        TypeScript’s structural type system was designed based on how JavaScript
+        code is typically written. Because JavaScript widely uses anonymous
+        objects like function expressions and object literals, it’s much more
+        natural to represent the kinds of relationships found in JavaScript
+        libraries with a structural type system instead of a nominal one.
+      </p>
+      <p>
+        TypeScriptの構造的型システムは、JavaScriptのコードの典型的な書き方をもとに設計されました。
+        JavaScriptは関数式やオブジェクトリテラルのように、広い範囲で無名オブジェクトが使用されており、
+        JavaScriptのライブラリで見られるように「名目上の型付け」の代わりに「構造的型システム」を使用した表現の方が、
+        より自然であると言えます。
+      </p>
+
+      <section>
+        <h3>A Note on Soundness 健全性の注意</h3>
+        <p>
+          TypeScript’s type system allows certain operations that can’t be known
+          at compile-time to be safe. When a type system has this property, it
+          is said to not be “sound”. The places where TypeScript allows unsound
+          behavior were carefully considered, and throughout this document we’ll
+          explain where these happen and the motivating scenarios behind them.
+        </p>
+        <p>
+          TypeScriptの型システムは、コンパイル時には安全なのか知ることができない特定の動作を許可してしまいます。
+          型システムがこの特性を持つ場合、これは"警告"の対象にはならないと言われています。
+          TypeScriptが信頼できない動作を許可してしまう箇所は、開発者が慎重に検討する必要があります。
+          このドキュメントを通して、これらが発生する状況とその背後にある要因を説明していきます。
+        </p>
+      </section>
+    </section>
+
+    <section>
+      <h2>Starting out</h2>
+      <p>
+        The basic rule for TypeScript’s structural type system is that x is
+        compatible with y if y has at least the same members as x. For example:
+      </p>
+      <p>
+        TypeScriptの構造型システムの基本的な規則は、yが少なくともxと同じメンバーを持つ場合、xはyと互換性があるということです。例えば：
+      </p>
+      <pre><code>interface Named {
+    name: string;
+}
+
+let x: Named;
+// y's inferred type is { name: string; location: string; }
+let y = { name: "Alice", location: "Seattle" };
+x = y;</code></pre>
+
+      <p>
+        To check whether y can be assigned to x, the compiler checks each
+        property of x to find a corresponding compatible property in y. In this
+        case, y must have a member called name that is a string. It does, so the
+        assignment is allowed.
+      </p>
+      <p>
+        yをxに代入できるかどうかを確認するために、コンパイラーはxの各プロパティーを調べて、y内の対応する互換プロパティーを見つけます。
+        この場合、yにはnameという名前のメンバーが必要です。これは文字列です。
+        そうであるので、割り当ては許可されます。
+      </p>
+      <p>
+        The same rule for assignment is used when checking function call
+        arguments:
+      </p>
+      <p>
+        関数呼び出しの引数をチェックするときにも、同じ割り当て規則が使用されます。
+      </p>
+
+      <pre><code>function greet(n: Named) {
+    console.log("Hello, " + n.name);
+}
+greet(y); // OK</code></pre>
+
+      <p>
+        Note that y has an extra location property, but this does not create an
+        error. Only members of the target type (Named in this case) are
+        considered when checking for compatibility.
+      </p>
+      <p>
+        yは他にlocationプロパティを持ちますが、これによってエラーが発生しないことに注目してください。
+        対象となるメンバーの型のみ(ここではNamed)が、互換性チェック時に考慮されます。
+      </p>
+      <p>
+        This comparison process proceeds recursively, exploring the type of each
+        member and sub-member.
+      </p>
+      <p>
+        この比較のプロセスは、各メンバとサブメンバの型も含めて再帰的に行われます。
+      </p>
+    </section>
+
+    <section>
+      <h2>Comparing two functions</h2>
+      <p>
+        While comparing primitive types and object types is relatively
+        straightforward, the question of what kinds of functions should be
+        considered compatible is a bit more involved. Let’s start with a basic
+        example of two functions that differ only in their parameter lists:
+      </p>
+      <p>
+        プリミティブ型とオブジェクト型の比較が簡単である一方、
+        関数の互換性の比較はどのように行われるべきなのか、という問いに応えるのは少し難しいと言えます。
+        並べられる引数だけが異なる2つの基本的な関数の例をもとに始めてみましょう。
+      </p>
+      <pre><code>let x = (a: number) => 0;
+let y = (b: number, s: string) => 0;
+y = x; // OK
+x = y; // Error</code></pre>
+
+      <p>
+        To check if x is assignable to y, we first look at the parameter list.
+        Each parameter in x must have a corresponding parameter in y with a
+        compatible type. Note that the names of the parameters are not
+        considered, only their types. In this case, every parameter of x has a
+        corresponding compatible parameter in y, so the assignment is allowed.
+      </p>
+      <p>
+        xがyに割り当てられるのかをチェックするためには、まず引数の一覧を確認します。
+        xの各引数は、yの対応する各引数が互換性のある型でなければいけません。
+        引数の型の名前は考慮されず、それらの型のみが考慮されることに注意してください。
+        このケースでは、xの各引数はyの対応する各引数に互換性があるため、
+        割り当てが可能となっています。
+      </p>
+      <p>
+        The second assignment is an error, because y has a required second
+        parameter that x does not have, so the assignment is disallowed.
+      </p>
+      <p>
+        2つ目の割り当てはエラーとなっています。
+        yは2つ目の引数を必要としていますが、xはこれを持たないため、割り当てが不可となっています。
+      </p>
+      <p>
+        You may be wondering why we allow ‘discarding’ parameters like in the
+        example y = x. The reason for this assignment to be allowed is that
+        ignoring extra function parameters is actually quite common in
+        JavaScript. For example, Array#forEach provides three parameters to the
+        callback function: the array element, its index, and the containing
+        array. Nevertheless, it’s very useful to provide a callback that only
+        uses the first parameter:
+      </p>
+      <p>
+        あなたはx =
+        yの例のように、何故引数を'破棄'してしまうことが許されるのかを疑問に感じたかもしれません。
+        この割り当てが許される理由は、余った関数の引数が無視されることが実際のJavaScriptで非常によく見られるためです。
+        例えばArray#forEachはコールバック関数に、その配列要素、インデックス、それを取り込んでいる配列の3つの引数を提供します。
+        それでもやはり、最初の引数だけを使用するコールバックを提供するのが非常に便利です。
+      </p>
+
+      <pre><code>let items = [1, 2, 3];
+
+// Don't force these extra parameters
+items.forEach((item, index, array) => console.log(item));
+
+// Should be OK!
+items.forEach(item => console.log(item));</code></pre>
+
+      <p>
+        Now let’s look at how return types are treated, using two functions that
+        differ only by their return type:
+      </p>
+      <p>
+        戻り型だけが異なる2つの関数を使用して、戻り型がどのように扱われるかを見てみましょう。
+      </p>
+
+      <section>
+        <h3>Function Parameter Bivariance</h3>
+        <p>
+          When comparing the types of function parameters, assignment succeeds
+          if either the source parameter is assignable to the target parameter,
+          or vice versa. This is unsound because a caller might end up being
+          given a function that takes a more specialized type, but invokes the
+          function with a less specialized type. In practice, this sort of error
+          is rare, and allowing this enables many common JavaScript patterns. A
+          brief example:
+        </p>
+
+        <p>
+          関数の引数の型を比較する場合、元の引数から対象の引数への割り当て、
+          またはその逆のどちらか一方の割り当てが可能であれば、これは成立します。
+          これは、呼び出す側が最終的により多くの固有の型を使用する関数になるかもしれませんが、
+          その関数はより少ない固有の型しか持たない状態で実行されるかもしれないため、脆弱になります。
+          実際にはこの類のエラーが起こることは稀であり、多くの一般的なJavaScriptのパターンではこれが使用されています。
+          手短な例を参考に確認してみましょう。
+        </p>
+
+        <pre><code>enum EventType { Mouse, Keyboard }
+
+interface Event { timestamp: number; }
+interface MouseEvent extends Event { x: number; y: number }
+interface KeyEvent extends Event { keyCode: number }
+
+function listenEvent(eventType: EventType, handler: (n: Event) => void) {
+    /* ... */
+}
+
+// Unsound, but useful and common
+listenEvent(EventType.Mouse, (e: MouseEvent) =&gt; console.log(e.x + "," + e.y));
+
+// Undesirable alternatives in presence of soundness
+listenEvent(EventType.Mouse, (e: Event) =&gt; console.log((&lt;MouseEvent&gt;e).x + "," + (&lt;MouseEvent&gt;e).y));
+listenEvent(EventType.Mouse, &lt;(e: Event) =&gt; void&gt;((e: MouseEvent) => console.log(e.x + "," + e.y)));
+
+// Still disallowed (clear error). Type safety enforced for wholly incompatible types
+listenEvent(EventType.Mouse, (e: number) =&gt; console.log(e));</code></pre>
+      </section>
+
+      <section>
+        <h3>Optional Parameters and Rest Parameters</h3>
+        <p>
+          When comparing functions for compatibility, optional and required
+          parameters are interchangeable. Extra optional parameters of the
+          source type are not an error, and optional parameters of the target
+          type without corresponding parameters in the source type are not an
+          error.
+        </p>
+        <p>
+          互換性のために関数を比較する場合、任意と必須の引数は入れ替えることが可能です。
+          元の型に指定される余分な任意引数がエラーになることはありません。
+          また、対象の型で相当する引数の無い任意の引数はエラーになりません。
+        </p>
+        <p>
+          When a function has a rest parameter, it is treated as if it were an
+          infinite series of optional parameters.
+        </p>
+        <p>
+          関数がRest引数を持つ場合、それは無限に連なる任意の引数のように扱われます。
+        </p>
+        <p>
+          This is unsound from a type system perspective, but from a runtime
+          point of view the idea of an optional parameter is generally not
+          well-enforced since passing undefined in that position is equivalent
+          for most functions.
+        </p>
+        <p>
+          これは型システムの観点から見ると脆弱ですが、ランタイム時の観点から見れば、任意の引数は大抵が強制されるものではありません。
+          ほとんどの関数で、その場所にはundefinedが渡されることと同義になるためです。
+        </p>
+        <p>
+          The motivating example is the common pattern of a function that takes
+          a callback and invokes it with some predictable (to the programmer)
+          but unknown (to the type system) number of arguments:
+        </p>
+        <p>
+          理解しやすいように、コールバックを受け取る一般的なパターンを例にとって説明します。
+          プログラマーからすれば実行内容を予測できますが、型システムからすると引数の数は分からないことになります。
+        </p>
+
+        <pre><code>function invokeLater(args: any[], callback: (...args: any[]) => void) {
+                /* ... Invoke callback with 'args' ... */
+            }
+            
+            // Unsound - invokeLater "might" provide any number of arguments
+            invokeLater([1, 2], (x, y) => console.log(x + ", " + y));
+            
+            // Confusing (x and y are actually required) and undiscoverable
+            invokeLater([1, 2], (x?, y?) => console.log(x + ", " + y));</code></pre>
+      </section>
+
+      <section>
+        <h3>Functions with overloads</h3>
+        <p>
+          When a function has overloads, each overload in the source type must
+          be matched by a compatible signature on the target type. This ensures
+          that the target function can be called in all the same situations as
+          the source function.
+        </p>
+        <p>
+          関数にオーバーロードがある場合、ソースタイプの各オーバーロードはターゲットタイプの互換性のあるシグネチャと一致しなければなりません。
+          これにより、ターゲット関数はソース関数と同じ状況でも呼び出すことができます。
+        </p>
+      </section>
+    </section>
+
+    <section>
+      <h2>Enums</h2>
+      <p>
+        Enums are compatible with numbers, and numbers are compatible with
+        enums. Enum values from different enum types are considered
+        incompatible. For example,
+      </p>
+      <p>
+        Enumは数値(number)と互換性があり、数値はEnumと互換性があります。
+        別のEnum型のEnum値は互換性が無いと判定されます。
+        下記にその例を示します。
+      </p>
+      <pre><code>enum Status { Ready, Waiting };
+enum Color { Red, Blue, Green };
+
+let status = Status.Ready;
+status = Color.Green;  // Error</code></pre>
+    </section>
+
+    <section>
+      <h2>Classes</h2>
+      <p>
+        Classes work similarly to object literal types and interfaces with one
+        exception: they have both a static and an instance type. When comparing
+        two objects of a class type, only members of the instance are compared.
+        Static members and constructors do not affect compatibility.
+      </p>
+      <p>
+        クラスはオブジェクトリテラル型とインターフェースと同じように動作しますが、1つだけ違いがあります。
+        それは静的型とインスタンス型の両方を持つということです。
+        クラス型の2つのオブジェクトを比較する際に、インスタンスのメンバだけが比較されます。
+        静的メンバとコンストラクタは、互換性に影響を与えません。
+      </p>
+      <pre><code>class Animal {
+    feet: number;
+    constructor(name: string, numFeet: number) { }
+}
+
+class Size {
+    feet: number;
+    constructor(numFeet: number) { }
+}
+
+let a: Animal;
+let s: Size;
+
+a = s;  // OK
+s = a;  // OK</code></pre>
+
+      <section>
+        <h3>
+          Private and protected members in classes
+          クラスのprivateメンバとprotectedメンバ
+        </h3>
+        <p>
+          Private and protected members in a class affect their compatibility.
+          When an instance of a class is checked for compatibility, if the
+          target type contains a private member, then the source type must also
+          contain a private member that originated from the same class.
+          Likewise, the same applies for an instance with a protected member.
+          This allows a class to be assignment compatible with its super class,
+          but not with classes from a different inheritance hierarchy which
+          otherwise have the same shape.
+        </p>
+        <p>
+          クラス内のPrivateメンバーとprotectedメンバーは、互換性に影響します。
+          クラスのインスタンスの互換性がチェックされるときに、ターゲット型にプライベートメンバが含まれている場合は、ソース型にも同じクラスから派生したプライベートメンバが含まれている必要があります。
+          同様に、保護されたメンバーを持つインスタンスにも同じことが当てはまります。
+          これにより、クラスはそのスーパークラスと代入互換性を持つことができますが、それ以外は同じ形状を持つ異なる継承階層のクラスとは互換性がありません。
+        </p>
+        <p>
+          protectedのメンバのインスタンスに対しても、同じことが適用されます。
+          これは、あるクラスがそのsuperクラスへの互換性の割り当てが可能ではあるが、
+          異なる継承関係から生じたものは、例え同じ形状をしたクラスであっても、不可であることを意味します。
+        </p>
+      </section>
+    </section>
+
+    <section>
+      <h2>Generics</h2>
+      <p>
+        Because TypeScript is a structural type system, type parameters only
+        affect the resulting type when consumed as part of the type of a member.
+        For example,
+      </p>
+      <p>
+        TypeScriptは構造的型システムであるため、型パラメーターはメンバの型の一部として使用された際には、型の結果に対してのみ影響を与えます。
+      </p>
+      <pre><code>interface Empty&lt;T&gt; {
+}
+let x: Empty&lt;number&gt;;
+let y: Empty&lt;string&gt;;
+
+x = y;  // OK, because y matches structure of x</code></pre>
+
+      <p>
+        In the above, x and y are compatible because their structures do not use
+        the type argument in a differentiating way. Changing this example by
+        adding a member to Empty&lt;T&gt; shows how this works:
+      </p>
+      <p>
+        上記の例では、xとyには互換性があります。
+        何故なら、これらの構造は型引数が識別されるような使い方をしていないからです。
+        次のようにして、Empty&lt;T&gt;にメンバを追加してみます。
+      </p>
+
+      <pre><code>interface NotEmpty&lt;T&gt; {
+    data: T;
+}
+let x: NotEmpty&lt;number&gt;;
+let y: NotEmpty&lt;string&gt;;
+
+x = y;  // Error, because x and y are not compatible</code></pre>
+
+      <p>
+        In this way, a generic type that has its type arguments specified acts
+        just like a non-generic type.
+      </p>
+      <p>
+        この場合、引数でその型が指定されるジェネリクスの型は、非ジェネリクスの型のように振る舞います。
+      </p>
+      <p>
+        For generic types that do not have their type arguments specified,
+        compatibility is checked by specifying any in place of all unspecified
+        type arguments. The resulting types are then checked for compatibility,
+        just as in the non-generic case.
+      </p>
+      <p>
+        引数によって型が指定されないジェネリクスの型の互換性は、
+        代わりにanyが指定されたものとしてチェックが行われます。
+        その結果としての型は、非ジェネリクスのようにして互換性がチェックされます。
+      </p>
+      <p>
+        For example,
+      </p>
+      <pre><code>let identity = function&lt;T&gt;(x: T): T {
+    // ...
+}
+
+let reverse = function&lt;U&gt;(y: U): U {
+    // ...
+}
+
+identity = reverse;  // OK, because (x: any) =&lt; any matches (y: any) => any</code></pre>
+    </section>
+
+    <section>
+      <h2>Advanced Topics</h2>
+      <section>
+        <h3>Subtype vs Assignment</h3>
+        <p>
+          So far, we’ve used “compatible”, which is not a term defined in the
+          language spec. In TypeScript, there are two kinds of compatibility:
+          subtype and assignment. These differ only in that assignment extends
+          subtype compatibility with rules to allow assignment to and from any,
+          and to and from enum with corresponding numeric values.
+        </p>
+        <p>
+          これまでのところ、私たちは「互換」を使用してきました。これは言語仕様で定義された用語ではありません。
+          TypeScriptには、サブタイプと代入という2種類の互換性があります。
+          これらの違いは、代入がサブタイプの互換性をルールと拡張し、anyとの代入、および対応する数値を持つenumとの代入を許可する点のみです。
+        </p>
+        <p>
+          Different places in the language use one of the two compatibility
+          mechanisms, depending on the situation. For practical purposes, type
+          compatibility is dictated by assignment compatibility, even in the
+          cases of the implements and extends clauses.
+        </p>
+        <p>
+          状況に応じて、言語のさまざまな場所で2つの互換性メカニズムのうちの1つが使用されます。実用上、型の互換性は、implements句およびextend句の場合でも、代入の互換性によって決まります。
+        </p>
+        <p>
+          For more information, see the TypeScript spec.
+        </p>
+        <p>
+          詳しくは、TypeScriptの仕様を参照してください。
+        </p>
+      </section>
+    </section>
+  </body>
+</html>

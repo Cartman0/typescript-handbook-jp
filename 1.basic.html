@@ -1,0 +1,516 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+
+  <body>
+    <h1>Basic Types</h1>
+
+    <section>
+      <h2>Introduction</h2>
+      For programs to be useful, we need to be able to work with some of the
+      simplest units of data: numbers, strings, structures, boolean values, and
+      the like. In TypeScript, we support much the same types as you would
+      expect in JavaScript, with a convenient enumeration type thrown in to help
+      things along.
+      <p>
+        プログラムが有用であるために、データの単位を数値、文字列、構造、真偽の値のような最も単純な単位で動作させる必要があります。
+        TypeScriptでは、便利なenum(列挙)型を含む、JavaScriptで期待されるであろう多くの型をサポートします。
+      </p>
+    </section>
+
+    <section>
+      <h2>Boolean</h2>
+
+      <p>
+        The most basic datatype is the simple true/false value, which JavaScript
+        and TypeScript call a <code>boolean</code> value.
+      </p>
+      <pre><code>let isDone: boolean = false;</code></pre>
+    </section>
+
+    <section>
+      <h2>Number</h2>
+      <p>
+        As in JavaScript, all numbers in TypeScript are floating point values.
+        These floating point numbers get the type number. In addition to
+        hexadecimal and decimal literals, TypeScript also supports binary and
+        octal literals introduced in ECMAScript 2015.
+      </p>
+
+      <p>
+        JavaScriptのように、TypeScriptの全ての数値は浮動小数点数の値です。
+        これらの浮動小数点数は数値の型を扱います。
+        16進数と10進数に加え、TypeScriptではECMAScript
+        2015で導入された2進数(binary)と8進数もサポートします。
+      </p>
+
+      <pre><code>let decimal: number = 6;
+let hex: number = 0xf00d; 
+let binary: number = 0b1010; 
+let octal: number = 0o744; </code></pre>
+    </section>
+
+    <section>
+      <h2>String</h2>
+      <p>
+        Another fundamental part of creating programs in JavaScript for webpages
+        and servers alike is working with textual data. As in other languages,
+        we use the type string to refer to these textual datatypes. Just like
+        JavaScript, TypeScript also uses double quotes (") or single quotes (')
+        to surround string data.
+      </p>
+      <p>
+        Webページやサーバー用のJavaScriptによるプログラム作成の重要な部分のひとつにテキストデータの扱いがあります。
+        他の言語のように、これらのテキストデータを参照するために文字列の型を使用します。
+        JavaScriptと同様に、TypeScriptもダブルクォート(")またはシングルクォート(')で文字列データを囲みます。
+      </p>
+      <pre><code>let color: string = "blue";
+color = 'red';</code></pre>
+
+      <p>
+        You can also use template strings, which can span multiple lines and
+        have embedded expressions. These strings are surrounded by the
+        backtick/backquote (`) character, and embedded expressions are of the
+        form ${ expr }.
+      </p>
+      <p>
+        また、複数行を取り扱うことが可能で式を埋め込むことの出来る、テンプレート文字列も使用することが可能です。
+        これらの文字列はバッククォート(`)文字で囲み、埋め込み式は<code
+          >${ expr }</code
+        >の形式を使用します。
+      </p>
+      <pre><code>let fullName: string = `Bob Bobbington`;
+let age: number = 37;
+let sentence: string = `Hello, my name is ${ fullName }.
+
+I'll be ${ age + 1 } years old next month.`;</code></pre>
+
+      <p>This is equivalent to declaring <code>sentence</code> like so:</p>
+      <p>
+        <code>sentence</code> は、下記のように定義したことと同義になります。
+      </p>
+      <pre><code>let sentence: string = "Hello, my name is " + fullName + ".\n\n" +
+"I'll be " + (age + 1) + " years old next month.";
+</code></pre>
+    </section>
+
+    <section>
+      <h2>Array</h2>
+      <p>
+        TypeScript, like JavaScript, allows you to work with arrays of values.
+        Array types can be written in one of two ways. In the first, you use the
+        type of the elements followed by <code>[]</code> to denote an array of
+        that element type:
+      </p>
+      <p>
+        TypeScriptはJavaScriptのように、値の配列を用いることが可能です。
+        配列(Array)型は2つの方法で書くことができます。
+        1つ目は、要素の型の配列を示すのに、[]の後に要素の型を使用する方法です。
+      </p>
+      <pre><code>let list: number[] = [1, 2, 3];</code></pre>
+      <p>
+        The second way uses a generic array type,
+        <code>Array&lt;elemType&gt;</code>:
+      </p>
+      <pre><code>let list: Array&lt;number&gt; = [1, 2, 3];</code></pre>
+    </section>
+
+    <section>
+      <h2>Tuple</h2>
+      <p>
+        Tuple types allow you to express an array where the type of a fixed
+        number of elements is known, but need not be the same. For example, you
+        may want to represent a value as a pair of a <code>string</code> and a
+        <code>number</code> :
+      </p>
+      <p>
+        タプル型は、要素の個数・型が決められた配列を表現することを可能にします。
+        例えば、あなたが文字列と数値のペアを値として表現したいとした場合は次のようにします。
+      </p>
+      <pre><code>// Declare a tuple type
+let x: [string, number];
+// Initialize it
+x = ["hello", 10]; // OK
+// Initialize it incorrectly
+x = [10, "hello"]; // Error</code></pre>
+
+      <p>
+        When accessing an element with a known index, the correct type is
+        retrieved:
+      </p>
+      <p>
+        予め把握しているインデックスの要素にアクセスすれば、正しい型が取得できます。
+      </p>
+      <pre><code>console.log(x[0].substr(1)); // OK
+console.log(x[1].substr(1)); // Error, 'number' does not have 'substr'</code></pre>
+
+      <p>
+        When accessing an element outside the set of known indices, a union type
+        is used instead:
+      </p>
+      <p>
+        予め設定した範囲外の要素にアクセスした場合は、代わりに共用体型(union
+        type)が使用されます。
+      </p>
+      <p>
+        according to that comment tuples is now fixed length.
+        <a href="https://github.com/Microsoft/TypeScript-Handbook/issues/975"
+          >https://github.com/Microsoft/TypeScript-Handbook/issues/975</a
+        >
+      </p>
+      <pre><code>x[3] = "world"; // OK, 'string' can be assigned to 'string | number'
+
+console.log(x[5].toString()); // OK, 'string' and 'number' both have 'toString'
+
+x[6] = true; // Error, 'boolean' isn't 'string | number'</code></pre>
+
+      <p>
+        Union types are an advanced topic that we’ll cover in a later chapter.
+      </p>
+    </section>
+
+    <section>
+      <h2>Enum</h2>
+      <p>
+        A helpful addition to the standard set of datatypes from JavaScript is
+        the <code>enum</code> . As in languages like C#, an enum is a way of
+        giving more friendly names to sets of numeric values.
+      </p>
+      <p>
+        JavaScriptの標準的なデータ型の助けとなる追加の型に、enumがあります。
+        C#言語のように、数値の集合の名付けをより分かりやすくしてくれるものです。
+      </p>
+      <pre><code>enum Color {Red, Green, Blue}
+let c: Color = Color.Green;</code></pre>
+
+      <p>
+        By default, enums begin numbering their members starting at 0. You can
+        change this by manually setting the value of one of its members. For
+        example, we can start the previous example at 1 instead of 0:
+      </p>
+      <p>
+        デフォルトでは、enumのメンバへの数値の割り当ては0から始まります。
+        メンバのひとつへ値を手動で設定することで、これを変更することが可能です。
+        例えば、下記は前述の例を0の代わりに1から始まるように設定しています。
+      </p>
+      <pre><code>enum Color {Red = 1, Green, Blue}
+  let c: Color = Color.Green;</code></pre>
+
+      <p>
+        Or, even manually set all the values in the enum:
+      </p>
+      <p>
+        下記は全てのenumの値に対して設定しています。
+      </p>
+      <pre><code>enum Color {Red = 1, Green = 2, Blue = 4}
+  let c: Color = Color.Green;</code></pre>
+
+      <p>
+        A handy feature of enums is that you can also go from a numeric value to
+        the name of that value in the enum. For example, if we had the value 2
+        but weren’t sure what that mapped to in the Color enum above, we could
+        look up the corresponding name:
+      </p>
+      <p>
+        enumの便利な機能として、数値からenumの値の名前にすることも可能であることが挙げられます。
+        例えば、2の値を持っているが、これが上記のColorのenumの何にマップするのか分からなくても、
+        対応する名前を見つけ出すことができます。
+      </p>
+      <pre><code>enum Color {Red = 1, Green, Blue};
+let colorName: string = Color[2];
+console.log(colorName); // Displays 'Green' as its value is 2 above</code></pre>
+    </section>
+
+    <section>
+      <h2>Any</h2>
+      <p>
+        We may need to describe the type of variables that we do not know when
+        we are writing an application. These values may come from dynamic
+        content, e.g. from the user or a 3rd party library. In these cases, we
+        want to opt-out of type-checking and let the values pass through
+        compile-time checks. To do so, we label these with the
+        <code>any</code> type:
+      </p>
+      <p>
+        アプリケーションを書いていると、値の型の記述は必要だが、その型が分からないケースが存在します。
+        これらの値は、例えばユーザーや3rdパーティ製のライブラリなどの動的なコンテンツからの値かもしれません。
+        こういったケースでは型チェックは諦め、コンパイル時のチェックは通してしまうようにしましょう。
+        これをするために、any型を割り当てます。
+      </p>
+      <pre><code>let notSure: any = 4;
+notSure = "maybe a string instead";
+notSure = false; // okay, definitely a boolean</code></pre>
+      <p>
+        The any type is a powerful way to work with existing JavaScript,
+        allowing you to gradually opt-in and opt-out of type-checking during
+        compilation. You might expect Object to play a similar role, as it does
+        in other languages. But variables of type Object only allow you to
+        assign any value to them - you can’t call arbitrary methods on them,
+        even ones that actually exist:
+      </p>
+      <p>
+        any型は既存のJavaScriptを動作させる強力な方法であり、
+        コンパイル時の型チェックを受ける・受けないを徐々に進めていくための助けになってくれます。
+        あなたはObjectに対して、他の言語でそうであるように、役割のようなものを演じることを期待するかもしれません。
+        ただし、Object型の変数では、それらに割り当てられた値しか使用することができず、
+        実際に存在するメソッドであったとしても、任意のメソッドを呼び出すことが出来ません。
+      </p>
+
+      <pre><code>let notSure: any = 4;
+notSure.ifItExists(); // okay, ifItExists might exist at runtime
+notSure.toFixed(); // okay, toFixed exists (but the compiler doesn't check)
+
+let prettySure: Object = 4;
+prettySure.toFixed(); // Error: Property 'toFixed' doesn't exist on type 'Object'.</code></pre>
+
+      <p>
+        The <code>any</code> type is also handy if you know some part of the
+        type, but perhaps not all of it. For example, you may have an array but
+        the array has a mix of different types:
+      </p>
+      <p>
+        一部の型は分かってはいるものの、それが全てかどうか分からないような場合にもany型は便利です。
+        例えば、異なる型が混合した配列を持つようなケースが挙げられます
+      </p>
+      <pre><code>let list: any[] = [1, true, "free"];
+list[1] = 100;</code></pre>
+    </section>
+
+    <section>
+      <h2>Void</h2>
+      <p>
+        <code>void</code> is a little like the opposite of <code>any</code> :
+        the absence of having any type at all. You may commonly see this as the
+        return type of functions that do not return a value:
+      </p>
+      <p>
+        <code>void</code
+        >は,<code>any</code>とは反対のような存在であり、如何なる型も存在しないことを表します。
+        一般的に、これは戻り値の無い関数の戻り値の型として見かけることがあるでしょう。
+      </p>
+      <pre><code>function warnUser(): void {
+    console.log("This is my warning message");
+}</code></pre>
+
+      <p>
+        Declaring variables of type <code>void</code> is not useful because you
+        can only assign <code>undefined</code> or <code>null</code> to them:
+      </p>
+      <p>
+        void型の変数宣言は、undefinedまたはnullしか割り当てることが出来ないため、有用とは言えません。
+      </p>
+      <pre><code>let unusable: void = undefined;</code></pre>
+    </section>
+
+    <section>
+      <h2>Null and Undefined</h2>
+      <p>
+        In TypeScript, both undefined and null actually have their own types
+        named undefined and null respectively. Much like void, they’re not
+        extremely useful on their own:
+      </p>
+      <p>
+        TypeScriptではundefinedとnullの両方に、
+        それぞれundefinedとnullという自身の型を持ちます。
+        voidと同じく、それだけで特に役に立つというわけではありません
+      </p>
+      <pre><code>// Not much else we can assign to these variables!
+let u: undefined = undefined;
+let n: null = null;</code></pre>
+
+      <p>
+        By default null and undefined are subtypes of all other types. That
+        means you can assign null and undefined to something like number.
+      </p>
+      <p>
+        デフォルトで、nullとundefinedは全ての他の型の部分型(subtype)になります。
+        これは、numberのようなものにnullとundefinedが割り当てられることを意味します。
+      </p>
+
+      <p>
+        However, when using the --strictNullChecks flag, null and undefined are
+        only assignable to void and their respective types. This helps avoid
+        many common errors. In cases where you want to pass in either a string
+        or null or undefined, you can use the union type string | null |
+        undefined. Once again, more on union types later on.
+      </p>
+      <p>
+        ただし、--strictNullChecksを使用した場合は、
+        nullとundefinedはvoidとそれぞれの型にしか割り当てることができなくなります。
+        これは、多くの陥りがちなエラーを回避するのに役立ちます。
+      </p>
+      <blockquote>
+        <p>
+          As a note: we encourage the use of --strictNullChecks when possible,
+          but for the purposes of this handbook, we will assume it is turned
+          off.
+        </p>
+        <p>
+          可能であれば--strictNullChecksを使用することをお勧めしますが、
+          このハンドブックでは、これはOFFにしているとみなして説明しています。
+        </p>
+      </blockquote>
+    </section>
+
+    <section>
+      <h2>Never</h2>
+      <p>
+        The <code>never</code> type represents the type of values that never
+        occur. For instance, never is the return type for a function expression
+        or an arrow function expression that always throws an exception or one
+        that never returns; Variables also acquire the type never when narrowed
+        by any type guards that can never be true.
+      </p>
+      <p>
+        never型は決して発生することのない値の型を表します。
+        例えば、neverは常に例外をスローする、または決して戻り値を返さない関数式またはアロー関数式の戻り値の型になります。
+        また、型の保護によって狭められ、絶対に真(true)にならない場合にnever型の値になります。
+      </p>
+      <p>
+        The never type is a subtype of, and assignable to, every type; however,
+        no type is a subtype of, or assignable to, never (except never itself).
+        Even any isn’t assignable to never.
+      </p>
+      <p>
+        never型は全ての型の部分型(subtype)であり、全ての型に割り当て可能ですが、
+        never自身を除き、どのような型もneverの部分型(subtype)にならず、割り当てることも出来ません。
+        anyでさえも、neverに割り当てることはできません。
+      </p>
+
+      <p>
+        Some examples of functions returning never:
+      </p>
+      <p>
+        neverを返す関数の例をいくつか示します
+      </p>
+
+      <pre><code>// Function returning never must have unreachable end point
+function error(message: string): never {
+    throw new Error(message);
+}
+
+// Inferred return type is never
+function fail() {
+    return error("Something failed");
+}
+
+// Function returning never must have unreachable end point
+// neverを返す関数は、終点への到達を不可にしなければいけません
+function infiniteLoop(): never {
+    while (true) {
+    }
+}</code></pre>
+    </section>
+
+    <section>
+      <h2>Object</h2>
+      <p>
+        Object object is a type that represents the non-primitive type, i.e. any
+        thing that is not number, string, boolean, symbol, null, or undefined.
+      </p>
+      <p>
+        objectは、非プリミティブ型を表す型です。つまり、number、string、boolean、symbol、null、またはundefined以外のものです。
+      </p>
+      <p>
+        With object type, APIs like Object.create can be better represented. For
+        example:
+      </p>
+      <p>
+        オブジェクト型を使用すると、Object.createのようなAPIをより適切に表現できます。例えば：
+      </p>
+      <pre><code>declare function create(o: object | null): void;
+
+create({ prop: 0 }); // OK
+create(null); // OK
+
+create(42); // Error
+create("string"); // Error
+create(false); // Error
+create(undefined); // Error</code></pre>
+    </section>
+
+    <section>
+      <h2>Type assertions</h2>
+      <p>
+        Sometimes you’ll end up in a situation where you’ll know more about a
+        value than TypeScript does. Usually this will happen when you know the
+        type of some entity could be more specific than its current type.
+      </p>
+      <p>
+        時折、TypeScriptより、あなたのほうが値について良く分かっているというケースが存在します。
+        通常これは何らかのエンティティが、現在の型よりも更に詳細に特定できる型であると、あなたが分かっているようなケースで発生します。
+      </p>
+      <p>
+        Type assertions are a way to tell the compiler “trust me, I know what
+        I’m doing.” A type assertion is like a type cast in other languages, but
+        performs no special checking or restructuring of data. It has no runtime
+        impact, and is used purely by the compiler. TypeScript assumes that you,
+        the programmer, have performed any special checks that you need.
+      </p>
+      <p>
+        型注釈(typeassertion)は、コンパイラに「私を信じて。これが何なのか分かっている。」と伝えるようなものです。
+        型注釈は他の言語での型キャストのようなものですが、
+        データの特別なチェックやデータの再構築を行いません。
+      </p>
+      <p>Type assertions have two forms. One is the “angle-bracket” syntax:</p>
+
+      <p>
+        型注釈はふたつの形式を持ちます。 ひとつは"角括弧"文法です。
+      </p>
+
+      <pre><code>let someValue: any = "this is a string";
+
+let strLength: number = (&lt;string&gt;someValue).length;</code></pre>
+
+      <p>
+        And the other is the as-syntax:
+      </p>
+      <pre><code>let someValue: any = "this is a string";
+
+let strLength: number = (someValue as string).length;</code></pre>
+
+      <p>
+        The two samples are equivalent. Using one over the other is mostly a
+        choice of preference; however, when using TypeScript with JSX, only
+        as-style assertions are allowed.
+      </p>
+      <p>
+        ふたつの例は同じ意味になります。
+        どちらを選択するかは、ほとんど好みの問題になりますが、
+        JSXを使用するTypeScriptではas形式のアサーションしか使用できません。
+      </p>
+    </section>
+
+    <section>
+      <h2>A note about let</h2>
+      <p>
+        You may’ve noticed that so far, we’ve been using the let keyword instead
+        of JavaScript’s var keyword which you might be more familiar with. The
+        let keyword is actually a newer JavaScript construct that TypeScript
+        makes available. 
+        We’ll discuss the details later, but many common
+        problems in JavaScript are alleviated by using let, so you should use it
+        instead of var whenever possible.
+      </p>
+      <p>
+        あなたは、我々がこれまでJavaScriptのvarキーワードの代わりに、
+        letキーワードを使用してきたことに気が付いているでしょう。
+        letキーワードは、実際に新しいJavaScriptの構成体であり、TypeScriptで利用可能にしています。
+        これについては後ほど詳しく説明しますが、JavaScriptの多くの一般的な問題がletを使用することで軽減されるため、
+        可能な限りvarの代わりにこれを使用するべきでしょう。
+      </p>
+    </section>
+
+    <section>
+      <h2></h2>
+      <p></p>
+      <p></p>
+    </section>
+
+    <script src="dst/basic.js"></script>
+  </body>
+</html>

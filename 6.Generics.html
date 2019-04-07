@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Generics</title>
+  </head>
+  <body>
+    <h1>Genecrics</h1>
+
+    <section>
+      <h2>Introduction</h2>
+      <p>
+        A major part of software engineering is building components that not
+        only have well-defined and consistent APIs, but are also reusable.
+        Components that are capable of working on the data of today as well as
+        the data of tomorrow will give you the most flexible capabilities for
+        building up large software systems.
+      </p>
+      <p>
+        ソフトウェア工学の大部分は、明確に定義され一貫性のあるAPIを持つだけでなく、再利用性のあるコンポーネントを構築することにあります。
+        現在のデータでも将来のデータでも動作可能なコンポーネントは、
+        大規模なソフトウェアシステムの構築に欠かせない柔軟な機能を提供してくれることになるでしょう。
+      </p>
+
+      <p>
+        In languages like C# and Java, one of the main tools in the toolbox for
+        creating reusable components is generics, that is, being able to create
+        a component that can work over a variety of types rather than a single
+        one. This allows users to consume these components and use their own
+        types.
+      </p>
+      <p>
+        C#やJavaのような言語では、再利用可能なコンポーネントを作成するための主要なツールの1つにジェネリクス(generics)があります。
+        これは、1つの型ではなく様々な型で動作するコンポーネントの作成を可能にしてくれます。
+        ユーザーは任意の型でそれらのコンポーネントを使用することができます。
+      </p>
+    </section>
+
+    <section>
+      <h2>Hello World of Generics</h2>
+      <p>
+        To start off, let’s do the “hello world” of generics: the identity
+        function. The identity function is a function that will return back
+        whatever is passed in. You can think of this in a similar way to the
+        echo command.
+      </p>
+      <p>
+        始めるにあたり、identity関数にジェネリクスの"Hello
+        World"をやらせてみましょう。
+        このidentity関数は、渡されたものをそのまま返す関数で、
+        echoコマンドと同じようなものだと考えてください。
+      </p>
+      <p>
+        Without generics, we would either have to give the identity function a
+        specific type:
+      </p>
+
+      <p>
+        ジェネリクスが無い場合は、特定の型をidentity関数に指定するか
+      </p>
+
+      <pre><code>function identity(arg: number): number {
+    return arg;
+}</code></pre>
+
+      <p>
+        Or, we could describe the identity function using the any type:
+      </p>
+
+      <p>
+        any型を使用したidentity関数にするかの、どちらかでなければいけません。
+      </p>
+
+      <pre><code>function identity(arg: any): any {
+    return arg;
+}</code></pre>
+
+      <p>
+        While using any is certainly generic in that it will cause the function
+        to accept any and all types for the type of arg, we actually are losing
+        the information about what that type was when the function returns. If
+        we passed in a number, the only information we have is that any type
+        could be returned.
+      </p>
+
+      <p>
+        anyを使用すれば、引数の型にとして全ての型が受け入れられることが明確に指定されますが、
+        関数の戻り値の型の情報は失われます。
+        もし、数値(number)を渡しても、得られる情報はany型が返るという情報だけです。
+      </p>
+
+      <p>
+        Instead, we need a way of capturing the type of the argument in such a
+        way that we can also use it to denote what is being returned. Here, we
+        will use a type variable, a special kind of variable that works on types
+        rather than values.
+      </p>
+      <p>
+        戻り値の型としても使用する出来るようにに、引数の型を捕捉する方法が必要です。
+        ここで、「値」ではなく「型」上で動作する特別な種類の変数である、「型変数
+        (type variable)」を使用してみます。
+      </p>
+
+      <pre><code>function identity&lt;T&gt;(arg: T): T {
+    return arg;
+}</code></pre>
+
+      <p>
+        We’ve now added a type variable T to the identity function. This T
+        allows us to capture the type the user provides (e.g. number), so that
+        we can use that information later. Here, we use T again as the return
+        type. On inspection, we can now see the same type is used for the
+        argument and the return type. This allows us to traffic that type
+        information in one side of the function and out the other.
+      </p>
+
+      <p>
+        ここで、identity関数へ型変数Tを追加しています。
+        このTはユーザーが提供した型(例: number)の捕捉を可能にするため、
+        この型情報を後で使用することができます。
+      </p>
+
+      <p>
+        We say that this version of the identity function is generic, as it
+        works over a range of types. Unlike using any, it’s also just as precise
+        (ie, it doesn’t lose any information) as the first identity function
+        that used numbers for the argument and return type.
+      </p>
+
+      <p>
+        ここでは、戻り値の型としてTを再び使用しています。
+        検証のために、引数と戻り値の型に同じ型が使用されていることが確認できます。
+        これは、入る型と出て行く型の行き来の捕捉を可能にしてくれます。
+      </p>
+
+      <p>
+        Once we’ve written the generic identity function, we can call it in one
+        of two ways. The first way is to pass all of the arguments, including
+        the type argument, to the function:
+      </p>
+
+      <p>
+        このidentity関数は、型にとらわれずに動作するジェネリクスな関数であると言えます。
+        anyを使用する場合と異なり、引数と戻り値をnumber型とする1つ目のidentity関数と同様に、
+        精密(型情報を失わない)であるとも言えるでしょう。
+        ジェネリックな関数に書き換えたので、2つの方法でこれを呼び出すことができます。
+        1つ目は型の引数を含め、全ての引数を関数へ渡す方法です。
+      </p>
+
+      <pre><code>let output = identity&lt;string&gt;("myString");  // type of output will be 'string'</code></pre>
+
+      <p>
+        Here we explicitly set T to be string as one of the arguments to the
+        function call, denoted using the <> around the arguments rather than ().
+      </p>
+      <p>
+        ここでは、関数呼び出しの引数の1つとして、Tがstringであることを明示的に設定しています。
+        この引数は()ではなく<>で囲って示しています。
+      </p>
+      <p>
+        The second way is also perhaps the most common. Here we use type
+        argument inference – that is, we want the compiler to set the value of T
+        for us automatically based on the type of the argument we pass in:
+      </p>
+
+      <p>
+        2つ目の方法は、おそらく最も一般的なものでもあるでしょう。
+        ここでは型引数の推論を使用し、コンパイラが渡した引数の型を元に、
+        Tの値を自動的に設定してくれることを期待します。
+      </p>
+
+      <pre><code>let output = identity("myString");  // type of output will be 'string'</code></pre>
+
+      <p>
+        Notice that we didn’t have to explicitly pass the type in the angle
+        brackets (&lt;&gt;); the compiler just looked at the value "myString",
+        and set T to its type. While type argument inference can be a helpful
+        tool to keep code shorter and more readable, you may need to explicitly
+        pass in the type arguments as we did in the previous example when the
+        compiler fails to infer the type, as may happen in more complex
+        examples.
+      </p>
+      <p>
+        &lt;&gt;の括弧内に型を明確にして渡す必要が無いことに注目してください。
+        コンパイラは"myString"の値だけを確認して、Tにその型を設定します。
+        型の引数の推論がコードを読みやすく短いものに保つ一方で、
+        より複雑なコードでコンパイラが型の推論に失敗するようなケースでは、
+        最初の例でそうしたように、型の引数を明確にして渡す必要があるかもしれません。
+      </p>
+    </section>
+
+    <section>
+      <h2>Working with Generic Type Variables</h2>
+      <p>
+        When you begin to use generics, you’ll notice that when you create
+        generic functions like identity, the compiler will enforce that you use
+        any generically typed parameters in the body of the function correctly.
+        That is, that you actually treat these parameters as if they could be
+        any and all types.
+      </p>
+      <p>
+        ジェネリクスの使用を始めるにあたり、identityのようなジェネリクスの関数を作成する際に、
+        関数の本文内で、適切にジェネリクス指定した型の引数が使用できる事を、コンパイラに強制させられることになるでしょう。
+        これでは実際には、引数をまるでany型(及び全ての型)であるかのように取り扱わなければいけません。
+        先程のidentityを例に考えてみましょう。
+      </p>
+      <p>
+        Let’s take our identity function from earlier:
+      </p>
+      <p>
+        先程のidentityを例に考えてみましょう。
+      </p>
+
+      <pre><code>function identity&lt;T&gt;(arg: T): T {
+    return arg;
+}</code></pre>
+
+      <p>
+        What if we want to also log the length of the argument arg to the
+        console with each call? We might be tempted to write this:
+      </p>
+
+      <p>
+        仮に、引数argのlengthを、コンソールにログ出力したい場合はどうでしょう？
+        つい、このように書いてしまうかもしれません。
+      </p>
+
+      <pre><code>function loggingIdentity&lt;T&gt;(arg: T): T {
+    console.log(arg.length);  // Error: T doesn't have .length
+    return arg;
+}</code></pre>
+
+      <p>
+        When we do, the compiler will give us an error that we’re using the
+        .length member of arg, but nowhere have we said that arg has this
+        member. Remember, we said earlier that these type variables stand in for
+        any and all types, so someone using this function could have passed in a
+        number instead, which does not have a .length member.
+      </p>
+      <p>
+        このようにすると、コンパイラはargが.lengthを持つことがどこにも説明されていないとして、
+        argが.lengthメンバを使用している事に対してエラーを発生させます。
+        先程、これらの型変数はanyと全ての型の代理であると説明したことを思い出してください。
+        誰かがこの関数を使用して、.lengthを持たない数値(number)を渡すことが出来てしまうということです。
+      </p>
+      <p>
+        Let’s say that we’ve actually intended this function to work on arrays
+        of T rather than T directly. Since we’re working with arrays, the
+        .length member should be available. We can describe this just like we
+        would create arrays of other types:
+      </p>
+      <p>
+        この関数で直接Tを使用するのではなく、Tの配列で動作させることを伝えてみましょう。
+        配列として動作させるのであれば、.lengthメンバは使用可能なはずです。
+        他の型の配列を作成するように、これを説明することが可能です。
+      </p>
+
+      <pre><code>function loggingIdentity&lt;T&gt;(arg: T[]): T[] {
+console.log(arg.length);  // Array has a .length, so no more error
+return arg;
+}</code></pre>
+
+      <p>
+        You can read the type of loggingIdentity as “the generic function
+        loggingIdentity takes a type parameter T, and an argument arg which is
+        an array of Ts, and returns an array of Ts.” If we passed in an array of
+        numbers, we’d get an array of numbers back out, as T would bind to
+        number. This allows us to use our generic type variable T as part of the
+        types we’re working with, rather than the whole type, giving us greater
+        flexibility.
+      </p>
+      <p>
+        loggingIdentityの関数は、「ジェネリクスの関数loggingIdentityは型引数Tを受け取り、
+        引数argはTの配列であり、Tの配列を返します」と読むことが出来ます。
+        もし、数値(number)の配列が渡された場合は、Tにはnumberが紐付けられ、
+        戻り値として数値の配列が返されることになります。
+        これにより、ジェネリクスの型変数Tを全ての型として取り扱うのではなく、型の1つとして使用でき、
+        より柔軟に書けるようになります。
+      </p>
+
+      <p>
+        We can alternatively write the sample example this way:
+      </p>
+      <p>
+        また、次のように書くことも可能です。
+      </p>
+
+      <pre><code>function loggingIdentity&lt;T&gt;(arg: Array&lt;T&gt;): Array&lt;T&gt; {
+            console.log(arg.length);  // Array has a .length, so no more error
+            return arg;
+        }</code></pre>
+
+      <p>
+        You may already be familiar with this style of type from other
+        languages. In the next section, we’ll cover how you can create your own
+        generic types like Array&lt;T&gt;.
+      </p>
+
+      <p>
+        もしかしたら、あなたは既に別の言語でのこの型の書き方に慣れているかもしれません。
+        次のセクションでは、Array&lt;T&gt;のような、自身のジェネリクス型の作り方について説明します。
+      </p>
+    </section>
+
+    <section>
+      <h2>Generic Types</h2>
+      <p>
+        In previous sections, we created generic identity functions that worked
+        over a range of types. In this section, we’ll explore the type of the
+        functions themselves and how to create generic interfaces.
+      </p>
+      <p>
+        前のセクションでは、特定の型に囚われないで動作するジェネリクスのidentity関数を作成しました。
+        このセクションでは、関数それ自身の型とジェネリクスのインターフェースを作成方法について説明します。
+      </p>
+      <p>
+        The type of generic functions is just like those of non-generic
+        functions, with the type parameters listed first, similarly to function
+        declarations:
+      </p>
+      <p>
+        ジェネリクスの関数の型は、それらの非ジェネリクス関数とほとんど同じです。
+      </p>
+      <pre><code>function identity&lt;T&gt;(arg: T): T {
+    return arg;
+}
+
+let myIdentity: &lt;T&gt;(arg: T) =&gt; T = identity;</code></pre>
+
+      <p>
+        We could also have used a different name for the generic type parameter
+        in the type, so long as the number of type variables and how the type
+        variables are used line up.
+      </p>
+      <p>
+        また、型変数の数と型変数の並び方が同じであれば、
+        ジェネリクスの型を異なる名前にすることも可能です。
+      </p>
+
+      <pre><code>function identity&lt;T&gt;(arg: T): T {
+            return arg;
+        }
+        
+        let myIdentity: &lt;U&gt;(arg: U) => U = identity;</code></pre>
+
+      <p>
+        We can also write the generic type as a call signature of an object
+        literal type:
+      </p>
+      <p>
+        また、オブジェクトリテラル型の呼び出しとして、ジェネリクスの型を書くことも可能です。
+      </p>
+      <pre><code>function identity&lt;T&gt;(arg: T): T {
+    return arg;
+}
+
+let myIdentity: {&lt;T&gt;(arg: T): T} = identity;</code></pre>
+
+      <p>
+        Which leads us to writing our first generic interface. Let’s take the
+        object literal from the previous example and move it to an interface:
+      </p>
+      <p>
+        次に、初めてのジェネリクスのインターフェースを書いてみましょう。
+        先の例のオブジェクトリテラルを、インターフェースにしてみます。
+      </p>
+      <pre><code>interface GenericIdentityFn {
+        &lt;T&gt;(arg: T): T;
+    }
+    function identity&lt;T&gt;(arg: T): T {
+        return arg;
+    }
+    let myIdentity: GenericIdentityFn = identity;</code></pre>
+      <p>
+        In a similar example, we may want to move the generic parameter to be a
+        parameter of the whole interface. This lets us see what type(s) we’re
+        generic over (e.g. Dictionary&lt;string&gt; rather than just
+        Dictionary). This makes the type parameter visible to all the other
+        members of the interface.
+      </p>
+      <p>
+        同様の例として、ジェネリクスのパラメーターを、インターフェース全体のパラメーターに移すことも可能です。
+        これは、ジェネリクスする型が何なのかを分かりやすくしてくれます (例:
+        Dictionalryではなく、Dictionary&lt;string&gt;)。
+        型パラメーターが、インターフェースの他の全てのメンバで可視化されます。
+      </p>
+      <pre><code>interface GenericIdentityFn&lt;T&gt; {
+    (arg: T): T;
+}
+
+function identity&lt;T&gt;(arg: T): T {
+    return arg;
+}
+
+let myIdentity: GenericIdentityFn&lt;number&gt; = identity;</code></pre>
+
+      <p>
+        Notice that our example has changed to be something slightly different.
+        Instead of describing a generic function, we now have a non-generic
+        function signature that is a part of a generic type. When we use
+        GenericIdentityFn, we now will also need to specify the corresponding
+        type argument (here: number), effectively locking in what the underlying
+        call signature will use. Understanding when to put the type parameter
+        directly on the call signature and when to put it on the interface
+        itself will be helpful in describing what aspects of a type are generic.
+      </p>
+      <p>
+        これらの例の違いが僅かであることに注意してください。
+        ジェネリクスの関数を表す代わりに、非ジェネリクスの関数をジェネリクスの型の一部としています。
+        GenericIdentityFnを使用する場合、それに対応した型を指定し(ここではnumber)、
+        下地とする呼び出し関数を固定する必要もあります。
+        型パラメーターを直接呼び出しシグネチャ上に配置するべきタイミング、
+        またインターフェース自身にそれを配置するべきタイミングを理解することは、ジェネリクスの型を表す手助けになるでしょう。
+      </p>
+      <p>
+        In addition to generic interfaces, we can also create generic classes.
+        Note that it is not possible to create generic enums and namespaces.
+      </p>
+      <p>
+        ジェネリクスのインターフェース(interface)に加え、ジェネリクスのクラス(class)を作成することも可能です。
+        ジェネリクスのenumと名前空間(namespace)の作成は出来ないことに注意してください。
+      </p>
+    </section>
+
+    <section>
+      <h2>Generic Classes ジェネリクスのクラス</h2>
+      <p>
+        A generic class has a similar shape to a generic interface. Generic
+        classes have a generic type parameter list in angle brackets (&lt;&gt;)
+        following the name of the class.
+      </p>
+      <p>
+        ジェネリクスのクラスは、ジェネリクスのインターフェースに似た形状をしています。
+        ジェネリクスのクラスは、ジェネリクスの型パラメーターのリストを、クラスの名前の後ろの括弧&lt;&gt;内に持ちます。
+      </p>
+      <pre><code>class GenericNumber&lt;T&gt; {
+    zeroValue: T;
+    add: (x: T, y: T) => T;
+}
+
+let myGenericNumber = new GenericNumber&lt;number&gt;();
+myGenericNumber.zeroValue = 0;
+myGenericNumber.add = function(x, y) { return x + y; };</code></pre>
+
+      <p>
+        This is a pretty literal use of the GenericNumber class, but you may
+        have noticed that nothing is restricting it to only use the number type.
+        We could have instead used string or even more complex objects.
+      </p>
+      <p>
+        これは文字通りGenericNumberクラスを使用しているに過ぎませんが、
+        あなたは、数値(number)型だけの使用に制限されているわけではないと、気付いたかもしれません。
+        これには、文字列または複雑なオブジェクトでさえも、代わりに使用することが可能です。
+      </p>
+      <pre><code>let stringNumeric = new GenericNumber&lt;string&gt;();
+stringNumeric.zeroValue = "";
+stringNumeric.add = function(x, y) { return x + y; };
+
+console.log(stringNumeric.add(stringNumeric.zeroValue, "test"));</code></pre>
+
+      <p>
+        Just as with interface, putting the type parameter on the class itself
+        lets us make sure all of the properties of the class are working with
+        the same type.
+      </p>
+      <p>
+        インターフェースのように、クラス上の型パラメーターを指定することで、
+        クラスのプロパティ全てが、それと同じ型で動作することを保証してくれます。
+      </p>
+      <p>
+        As we covered in our section on classes, a class has two sides to its
+        type: the static side and the instance side. Generic classes are only
+        generic over their instance side rather than their static side, so when
+        working with classes, static members can not use the class’s type
+        parameter.
+      </p>
+      <p>
+        クラスのセクションで、
+        クラスには静的側とインスタンス側の、2つの型の側面があることを説明しました。
+        ジェネリクスなクラスでは、静的側ではなくインスタンス側のみが有効であり、
+        そのためクラスで使用する際には、静的メンバはクラスの型パラメーターを使用することはできません。
+      </p>
+    </section>
+
+    <section>
+      <h2>Generic Constraints</h2>
+      <p>
+        If you remember from an earlier example, you may sometimes want to write
+        a generic function that works on a set of types where you have some
+        knowledge about what capabilities that set of types will have. In our
+        loggingIdentity example, we wanted to be able to access the .length
+        property of arg, but the compiler could not prove that every type had a
+        .length property, so it warns us that we can’t make this assumption.
+      </p>
+      <p>
+        先程の例を覚えていれば、時には数種類の型がどのような特性なのかを理解した上で、
+        特定の型に限定されずに動作するジェネリクスの関数を書きたいと考えることがあるでしょう。
+        loggingIdentityの例では、argの.lengthにアクセスできるようにしたいと考えましたが、
+        コンパイラは全ての型が.lengthプロパティを持つとは限らないとして、これに対して警告を発しました。
+      </p>
+      <pre><code>function loggingIdentity&lt;T&gt;(arg: T): T {
+    console.log(arg.length);  // Error: T doesn't have .length
+    return arg;
+}</code></pre>
+      <p>
+        Instead of working with any and all types, we’d like to constrain this
+        function to work with any and all types that also have the .length
+        property. As long as the type has this member, we’ll allow it, but it’s
+        required to have at least this member. To do so, we must list our
+        requirement as a constraint on what T can be.
+      </p>
+      <p>
+        anyまたは全ての型で動作させるのではなく、
+        .lengthプロパティを持つ全ての型で動作するように、この関数に制約を掛けたいと思います。
+        型がこのメンバを持ちさえすれば良いということは、少なくともこのメンバを持つことが必須となります。
+        これを実現するために、Tが何になれるのかという制約をかける必要があります。
+      </p>
+      <p>
+        To do so, we’ll create an interface that describes our constraint. Here,
+        we’ll create an interface that has a single .length property and then
+        we’ll use this interface and the extends keyword to denote our
+        constraint:
+      </p>
+      <p>
+        これを行うために、この制約を表すインターフェースを作成します。
+        単一の.lengthプロパティを持つインターフェースを作成し、
+        このインターフェースとextendsを使用することで制約を表現します。
+      </p>
+      <pre><code>interface Lengthwise {
+    length: number;
+}
+
+function loggingIdentity&lt;T extends Lengthwise&gt;(arg: T): T {
+    console.log(arg.length);  // Now we know it has a .length property, so no more error
+    return arg;
+}</code></pre>
+
+      <p>
+        Because the generic function is now constrained, it will no longer work
+        over any and all types:
+      </p>
+      <p>
+        このジェネリクスの関数に制約が掛けられたため、もはやany及び全ての型で動作しません。
+      </p>
+      <pre><code>loggingIdentity(3);  // Error, number doesn't have a .length property</code></pre>
+
+      <p>
+        Instead, we need to pass in values whose type has all the required
+        properties:
+      </p>
+      <pre><code>loggingIdentity({length: 10, value: 3});</code></pre>
+    </section>
+
+    <section>
+      <h2>Using Type Parameters in Generic Constraints</h2>
+      <p>
+        You can declare a type parameter that is constrained by another type
+        parameter. For example, here we’d like to get a property from an object
+        given its name. We’d like to ensure that we’re not accidentally grabbing
+        a property that does not exist on the obj, so we’ll place a constraint
+        between the two types:
+      </p>
+      <p>
+        他の型のパラメーターによって制約がかけられた型のパラメーターを宣言することが可能です。
+        例えば、2つのオブジェクトを受け取り、片方からもう一方へプロパティをコピーしたいとします。
+        誤ってsourceに存在しない余計なプロパティが書かれないことを保証するために、
+        2つの型の間に制約を設けます。
+      </p>
+      <pre><code>function getProperty&lt;T, K extends keyof T&gt;(obj: T, key: K) {
+    return obj[key];
+}
+
+let x = { a: 1, b: 2, c: 3, d: 4 };
+
+getProperty(x, "a"); // okay
+getProperty(x, "m"); // error: Argument of type 'm' isn't assignable to 'a' | 'b' | 'c' | 'd'.</code></pre>
+
+      <section>
+        <h3>Using Class Types in Generics</h3>
+        <p>
+          When creating factories in TypeScript using generics, it is necessary
+          to refer to class types by their constructor functions. For example,
+        </p>
+        <p>
+          TypeScriptでジェネリクスを使用してファクトリーを作成する際に、
+          コンストラクタ関数を使用してクラスの型を参照することが必要になります。
+          下記はその一例となります。
+        </p>
+        <pre><code>function create&lt;T&gt;(c: {new(): T; }): T {
+    return new c();
+}</code></pre>
+
+        <p>
+          A more advanced example uses the prototype property to infer and
+          constrain relationships between the constructor function and the
+          instance side of class types.
+        </p>
+        <p>
+          より進んだ例として、参照のためにprototypeプロパティを使用し、
+          コンストラクタ関数とクラス型のインスタンス側の関係に制約をかけます。
+        </p>
+
+        <pre><code>class BeeKeeper {
+    hasMask: boolean;
+}
+class ZooKeeper {
+    nametag: string;
+}
+class Animal {
+    numLegs: number;
+}
+class Bee extends Animal {
+    keeper: BeeKeeper;
+}
+class Lion extends Animal {
+    keeper: ZooKeeper;
+}
+function findKeeper<A extends Animal, K> (a: {new(): A;
+    prototype: {keeper: K}}): K {
+    return a.prototype.keeper;
+}
+function createInstance<A extends Animal>(c: new () => A): A {
+        return new c();
+}
+
+createInstance(Lion).keeper.nametag;  // typechecks!
+createInstance(Bee).keeper.hasMask;   // typechecks!</code></pre>
+      </section>
+    </section>
+
+    <section>
+      <h2></h2>
+      <p></p>
+      <pre><code></code></pre>
+    </section>
+
+    <section>
+      <h2></h2>
+      <p></p>
+      <pre><code></code></pre>
+    </section>
+  </body>
+</html>

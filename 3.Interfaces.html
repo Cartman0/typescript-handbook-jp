@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Interfaces</title>
+  </head>
+  <body>
+    <h1>
+      Interfaces
+    </h1>
+
+    <section>
+      <h2>Introduction</h2>
+      <p>
+        One of TypeScript’s core principles is that type-checking focuses on the
+        shape that values have. This is sometimes called “duck typing” or
+        “structural subtyping”. In TypeScript, interfaces fill the role of
+        naming these types, and are a powerful way of defining contracts within
+        your code as well as contracts with code outside of your project.
+      </p>
+      <p>
+        TypeScriptの核となる基本原則のひとつに、値の型チェックが値が持つ形状に焦点を当てていることがあげられます。
+        これは、時には"ダックタイピング"または"構造的部分型"と呼ばれます。
+        TypeScriptでは、インターフェースはこれらの型の名付けの規則を満たし、
+        また、プロジェクトの外観を構成するだけでなく、コードの構造を定義する強力な方法になります。
+      </p>
+    </section>
+
+    <section>
+      <h2>Our First Interface 初めてのインターフェース</h2>
+      <p>
+        The easiest way to see how interfaces work is to start with a simple
+        example:
+      </p>
+      <pre><code>function printLabel(labelledObj: { label: string }) {
+        console.log(labelledObj.label);
+    }
+    
+    let myObj = {size: 10, label: "Size 10 Object"};
+    printLabel(myObj);</code></pre>
+      <p>
+        The type-checker checks the call to printLabel. The printLabel function
+        has a single parameter that requires that the object passed in has a
+        property called label of type string. Notice that our object actually
+        has more properties than this, but the compiler only checks that at
+        least the ones required are present and match the types required. There
+        are some cases where TypeScript isn’t as lenient, which we’ll cover in a
+        bit.
+      </p>
+      <p>
+        型チェッカーは、printLabel呼び出しをチェックします。
+        printLabel関数はひとつの引数を持ち、
+        labelと呼ばれる文字列型のプロパティを持つオブジェクトが渡されることを必要とします。
+        実際のオブジェクトはこれより多くのプロパティを持ちますが、
+        コンパイラは必要とされている最低限のひとつのプロパティが存在し、
+        それが必要とされている型とマッチしていることしかチェックしないことに注意してください。
+        TypeScriptを寛大にさせないように、こちらで少しカバーすることになるケースが存在します。
+      </p>
+      <p>
+        We can write the same example again, this time using an interface to
+        describe the requirement of having the label property that is a string:
+      </p>
+      <p>
+        同じ例を、文字列のlabelプロパティを持つことを必須とするインターフェースを使用して、書きなおしてみましょう。
+      </p>
+      <pre><code>interface LabelledValue {
+        label: string;
+    }
+    
+    function printLabel(labelledObj: LabelledValue) {
+        console.log(labelledObj.label);
+    }
+    
+    let myObj = {size: 10, label: "Size 10 Object"};
+    printLabel(myObj);</code></pre>
+
+      <p>
+        The interface LabelledValue is a name we can now use to describe the
+        requirement in the previous example. It still represents having a single
+        property called label that is of type string. Notice we didn’t have to
+        explicitly say that the object we pass to printLabel implements this
+        interface like we might have to in other languages. Here, it’s only the
+        shape that matters. If the object we pass to the function meets the
+        requirements listed, then it’s allowed.
+      </p>
+      <p>
+        printLabelに渡すこのオブジェクトが、他の言語でそうする必要があるように、
+        このインターフェースを実装すると明確に記述していない事に注意してください。
+        ここでは、事柄を形作っているだけに過ぎません。
+        関数に渡すオブジェクトが必須となるものを揃えてさえいれば、それは問題なく受け入れられます。
+      </p>
+      <p>
+        It’s worth pointing out that the type-checker does not require that
+        these properties come in any sort of order, only that the properties the
+        interface requires are present and have the required type.
+      </p>
+      <p>
+        重要な点は、型チェッカーがこれらのプロパティに対して正しい順序であることを必要とせず、
+        インターフェースで指定されているプロパティが提供され、必須となる型を持っているかだけを必要としていることです。
+      </p>
+    </section>
+
+    <section>
+      <h2>Optional Properties</h2>
+      <p>
+        Not all properties of an interface may be required. Some exist under
+        certain conditions or may not be there at all. These optional properties
+        are popular when creating patterns like “option bags” where you pass an
+        object to a function that only has a couple of properties filled in.
+      </p>
+      <p>
+        インターフェイスのすべてのプロパティが必要なわけではありません。
+        ある条件下では存在するものもあればまったく存在しないものもあります。
+        これらのオプションのプロパティは、2つのプロパティのみが入力されている関数にオブジェクトを渡す「オプションバッグ」のようなパターンを作成するときに一般的です。
+      </p>
+      <p>
+        Here’s an example of this pattern:
+      </p>
+      <p>
+        下記はこのパターンの例になります。
+      </p>
+      <pre><code>interface SquareConfig {
+        color?: string;
+        width?: number;
+    }
+    
+    function createSquare(config: SquareConfig): {color: string; area: number} {
+        let newSquare = {color: "white", area: 100};
+        if (config.color) {
+            newSquare.color = config.color;
+        }
+        if (config.width) {
+            newSquare.area = config.width * config.width;
+        }
+        return newSquare;
+    }
+    
+    let mySquare = createSquare({color: "black"});</code></pre>
+
+      <p>
+        Interfaces with optional properties are written similar to other
+        interfaces, with each optional property denoted by a <code>?</code> at
+        the end of the property name in the declaration.
+      </p>
+      <p>
+        任意のプロパティを持つインターフェースの書き方は、他の言語のインターフェースの書き方に似ています。
+        宣言の中で任意にしたいプロパティの末尾に?の印を付けます。
+      </p>
+      <p>
+        The advantage of optional properties is that you can describe these
+        possibly available properties while still also preventing use of
+        properties that are not part of the interface. For example, had we
+        mistyped the name of the color property in createSquare, we would get an
+        error message letting us know:
+      </p>
+      <p>
+        任意のプロパティの利点は、利用できるプロパティを言い表し、
+        インターフェースの一部では無いプロパティが使用されることを防ぐ役割も果たしてくれます。
+        例えば、createSquareのcolorプロパティの名前を打ち間違えたとしても、
+        エラーメッセージがそのことをすぐに知らせてくれます。
+      </p>
+      <pre><code>interface SquareConfig {
+        color?: string;
+        width?: number;
+    }
+    function createSquare(config: SquareConfig): { color: string; area: number } {
+        let newSquare = {color: "white", area: 100};
+        if (config.color) {
+            // Error: Property 'collor' does not exist on type 'SquareConfig'
+            newSquare.color = config.collor;
+        }
+        if (config.width) {
+            newSquare.area = config.width * config.width;
+        }
+        return newSquare;
+    }
+    let mySquare = createSquare({color: "black"});</code></pre>
+    </section>
+
+    <section>
+      <h2>Readonly properties</h2>
+      <p>
+        Some properties should only be modifiable when an object is first
+        created. You can specify this by putting readonly before the name of the
+        property:
+      </p>
+      <p>
+        オブジェクトが作成される最初の時には、いくつかのプロパティは編集可(modifiable)のはずです。
+        プロパティ名の前にreadonlyを置くことで、読み込み専用の指定をすることが可能です。
+      </p>
+      <pre><code>interface Point {
+    readonly x: number;
+    readonly y: number;
+}</code></pre>
+
+      <p>
+        You can construct a Point by assigning an object literal. After the
+        assignment, x and y can’t be changed.
+      </p>
+      <pre><code>let p1: Point = { x: 10, y: 20 };
+p1.x = 5; // error!</code></pre>
+
+      <p>
+        TypeScriptの<code>ReadonlyArray&lt;T&gt;</code>の型は、
+        変更処理を行う全てのメソッドが削除された
+        <code>Array&lt;T&gt;</code>と同義です。
+        そのため、配列の作成後に変更できないことを確認できます。
+      </p>
+
+      <p>
+        You can construct a Point by assigning an object literal. After the
+        assignment, x and y can’t be changed.
+      </p>
+      <pre><code>let p1: Point = { x: 10, y: 20 };
+p1.x = 5; // error!</code></pre>
+
+      <p>
+        TypeScript comes with a <code>ReadonlyArray&lt;T&gt;</code> type that is
+        the same as <code>Array&lt;T&gt;</code> with all mutating methods
+        removed, so you can make sure you don’t change your arrays after
+        creation:
+      </p>
+      <p>
+        TypeScriptの<code>ReadonlyArray&lt;T&gt;</code>の型は、
+        変更処理を行う全てのメソッドが削除された<code>Array&lt;T&gt;</code>と同義です。
+        そのため、配列の作成後に変更できないことを確認できます
+      </p>
+      <pre><code>let a: number[] = [1, 2, 3, 4];
+let ro: ReadonlyArray&lt;number&gt; = a;
+ro[0] = 12; // error!
+ro.push(5); // error!
+ro.length = 100; // error!
+a = ro; // error!
+</code></pre>
+
+      <p>
+        On the last line of the snippet you can see that even assigning the
+        entire ReadonlyArray back to a normal array is illegal. You can still
+        override it with a type assertion, though:
+      </p>
+      <p>
+        上記の例の最後の行で、ReadonlyArray全体を通常の配列に戻すことさえ、許可されないことがわかります。
+        それでも、型注釈(type assertion)で上書きすることは可能です。
+      </p>
+      <pre><code>a = ro as number[];</code></pre>
+    </section>
+
+    <section>
+      <h2>readonly vs const</h2>
+      <p>
+        The easiest way to remember whether to use readonly or const is to ask
+        whether you’re using it on a variable or a property. Variables use const
+        whereas properties use readonly.
+      </p>
+      <p>
+        readonlyまたはconstのどちらを使用するのかを覚える最も簡単な方法は、
+        これは変数で使用するのかプロパティで使用するのかを確認することです。
+        変数であればconstを使用し、プロパティであればreadonlyを使用します。
+      </p>
+    </section>
+
+    <section>
+      <h2>Excess Property Checks</h2>
+      <p>
+        In our first example using interfaces, Type
+      </p>
+      <p>
+        インターフェースを使った最初の例として、
+        <code>{ label: string; }</code>のみが期待されているところに、 { size:
+        number; label: string; }を渡してみましょう。
+        また、任意のプロパティと、"option
+        bags"がどのように便利かも学んでいきましょう。
+      </p>
+      <p>
+        However, combining the two naively would let you to shoot yourself in
+        the foot the same way you might in JavaScript. For example, taking our
+        last example using createSquare:
+      </p>
+      <p>
+        しかしながら、安易に両者を繋げてしまうことは、JavaScriptでしていたかもしれないように、
+        自分の首をしめてしまうことになりかねません。
+        例えば、直近のcreateSquareを使用した例で確認してみましょう。
+      </p>
+      <pre><code>interface SquareConfig {
+    color?: string;
+    width?: number;
+}
+function createSquare(config: SquareConfig): { color: string; area: number } {
+    // ...
+}
+let mySquare = createSquare({ colour: "red", width: 100 });</code></pre>
+
+      <p>
+        Notice the given argument to createSquare is spelled colour instead of
+        color. In plain JavaScript, this sort of thing fails silently.
+      </p>
+
+      <p>
+        このチェックを回避するのは非常に簡単です。 最も簡単な方法は、型注釈(type
+        assertion)を使用することです。
+      </p>
+
+      <p>
+        You could argue that this program is correctly typed, since the width
+        properties are compatible, there’s no color property present, and the
+        extra colour property is insignificant.
+      </p>
+
+      <p>
+        widthプロパティには適合しており、
+        colorプロパティは提供されず、過剰なcolourプロパティは何の影響も与えないことから、
+        あなたは「このプログラムは問題ない」と判定されるのではないかと考えるかもしれません。
+      </p>
+
+      <p>
+        However, TypeScript takes the stance that there’s probably a bug in this
+        code. Object literals get special treatment and undergo excess property
+        checking when assigning them to other variables, or passing them as
+        arguments. If an object literal has any properties that the “target
+        type” doesn’t have, you’ll get an error.
+      </p>
+
+      <p>
+        しかしながら、TypeScriptは「このコードはもしかしたらバグなのかもしれない」、という判定をくだします。
+        オブジェクトリテラルは、他の変数へ割り当てられる際に、または引数として渡される際に、
+        過剰なプロパティが存在しないか特別なチェックを受けます。
+        もしオブジェクトリテラルが幾つかのプロパティを持ち、
+        それが"対象の型"を持たない場合はエラーが発生します。
+      </p>
+
+      <pre><code>// error: 'colour' not expected in type 'SquareConfig'
+let mySquare = createSquare({ colour: "red", width: 100 });</code></pre>
+
+      <p>
+        Getting around these checks is actually really simple. The easiest
+        method is to just use a type assertion:
+      </p>
+      <p>
+        このチェックを回避するのは非常に簡単です。 最も簡単な方法は、型注釈(type
+        assertion)を使用することです。
+      </p>
+      <pre><code>let mySquare = createSquare({ width: 100, opacity: 0.5 } as SquareConfig);</code></pre>
+
+      <p>
+        However, a better approach might be to add a string index signature if
+        you’re sure that the object can have some extra properties that are used
+        in some special way. If SquareConfig can have color and width properties
+        with the above types, but could also have any number of other
+        properties, then we could define it like so:
+      </p>
+      <p>
+        ただし、特別なことに使用される幾つかの拡張(extra)プロパティを、オブジェクトが持つことを分かっていれば、
+        文字列インデックスシグネチャを追加する方が、より良い方法かもしれません。
+        もし、SquareConfigsがcolorとwidthプロパティを下記の型として持ち、
+        他の任意の数のプロパティも持つことを可能にするには、次のように定義します。
+      </p>
+      <pre><code>interface SquareConfig {
+    color?: string;
+    width?: number;
+    [propName: string]: any;
+}</code></pre>
+
+      <p>
+        We’ll discuss index signatures in a bit, but here we’re saying a
+        SquareConfig can have any number of properties, and as long as they
+        aren’t color or width, their types don’t matter.
+      </p>
+      <p>
+        インデックスシグネチャについては後ほど説明しますが、
+        ここではSquareConfigはcolorまたはwidthではない任意のプロパティを持つことが可能であり、
+        これらの型は問わない(any)ということだけ説明しておきます。
+      </p>
+      <p>
+        One final way to get around these checks, which might be a bit
+        surprising, is to assign the object to another variable: Since
+        squareOptions won’t undergo excess property checks, the compiler won’t
+        give you an error.
+      </p>
+      <p>
+        最後に少し驚かれるかもしれませんが、これらのチェックの回避方法として、
+        別の変数へオブジェクトを割り当てる、という方法について説明します。
+        squareOptionsは過剰なプロパティに対するチェックを受けないため、
+        コンパイラはエラーを発生させません。
+      </p>
+      <pre><code>let squareOptions = { colour: "red", width: 100 };
+let mySquare = createSquare(squareOptions);</code></pre>
+
+      <p>
+        Keep in mind that for simple code like above, you probably shouldn’t be
+        trying to “get around” these checks. For more complex object literals
+        that have methods and hold state, you might need to keep these
+        techniques in mind, but a majority of excess property errors are
+        actually bugs. That means if you’re running into excess property
+        checking problems for something like option bags, you might need to
+        revise some of your type declarations. In this instance, if it’s okay to
+        pass an object with both a color or colour property to createSquare, you
+        should fix up the definition of SquareConfig to reflect that.
+      </p>
+      <p>
+        上記のようなシンプルなコードであれば、これらのチェックの"回避"を行う必要は、
+        おそらく無いであろうことは肝に命じておいてください。
+        メソッドと状態を保持するような、より複雑なオブジェクトリテラルのために、
+        これらのテクニックを覚えておくとよいかもしれませんが、
+        過剰なプロパティのエラーは実際のところ大半がバグでしょう。
+        これは、option
+        bagsなどに対する過剰プロパティの問題のチェックを実行する場合、
+        あなたの型宣言の一部を修正する必要があるかもしれないことを意味します。
+        この場合、もしcreateSquareにcolorとcolourの両方を持つオブジェクトを渡すことが問題無いのであれば、
+        これを反映するためのSquareConfigの定義を取り付けるべきです。
+      </p>
+    </section>
+
+    <section>
+      <h2>Function Types</h2>
+      <p>
+        Interfaces are capable of describing the wide range of shapes that
+        JavaScript objects can take. In addition to describing an object with
+        properties, interfaces are also capable of describing function types.
+      </p>
+      <p>
+        Interfacesは、JavaScriptオブジェクトが取り得るさまざまな形状を記述することができます。プロパティを持つオブジェクトを記述することに加えて、インタフェースは関数型を記述することもできます。
+      </p>
+
+      <p>
+        To describe a function type with an interface, we give the interface a
+        call signature. This is like a function declaration with only the
+        parameter list and return type given. Each parameter in the parameter
+        list requires both name and type.
+      </p>
+      <p>
+        インターフェースを使用して関数型を記述するために、インターフェースにコールシグネチャを与えます。
+        これはパラメーターの一覧と戻り値の型のみが指定された関数宣言のようなものです。
+        各パラメーターは名前と型の両方を必要とします。
+      </p>
+
+      <p>
+        Once defined, we can use this function type interface like we would
+        other interfaces. Here, we show how you can create a variable of a
+        function type and assign it a function value of the same type.
+      </p>
+      <p>
+        一度定義すれば、他のインターフェースと同じようにこの関数型インターフェースを使用できます。ここでは、関数型の変数を作成し、それに同じ型の関数値を代入する方法を示します。
+      </p>
+      <pre><code>let mySearch: SearchFunc;
+mySearch = function(src: string, sub: string): boolean {
+    let result = src.search(sub);
+    return result > -1;
+}</code></pre>
+
+      <p>
+        Function parameters are checked one at a time, with the type in each
+        corresponding parameter position checked against each other. If you do
+        not want to specify types at all, TypeScript’s contextual typing can
+        infer the argument types since the function value is assigned directly
+        to a variable of type SearchFunc. Here, also, the return type of our
+        function expression is implied by the values it returns (here false and
+        true). Had the function expression returned numbers or strings, the
+        type-checker would have warned us that return type doesn’t match the
+        return type described in the SearchFunc interface.
+      </p>
+      <p>
+        関数のパラメーターは、その位置に対するそれぞれの型に対してひとつずつチェックされます。
+        全ての型を指定したくない場合、
+        関数の値はSearchFunc型の変数に直接割り当てられるため、
+        TypeScriptによるコンテキストの型付けで、引数の型が推測されます。
+        また、関数式の戻り値の型も、返される値(ここではfalseとtrue)によって暗黙的に決められます。
+        仮に関数式が数値または文字列を返すとしたら、
+        型チェッカーは戻り値の型がSearchFuncインターフェースで記述されている型と一致しないという警告を発します。
+      </p>
+    </section>
+
+    <section>
+      <h2>Indexable Types</h2>
+      <p>
+        Similarly to how we can use interfaces to describe function types, we
+        can also describe types that we can “index into” like a[10], or
+        ageMap["daniel"]. Indexable types have an index signature that describes
+        the types we can use to index into the object, along with the
+        corresponding return types when indexing. Let’s take an example:
+      </p>
+      <p>
+        関数型を記述するインターフェースが使用できるのと同様に、
+        a[10]またはageMap["daniel"]のようなインデックス可能な型を記述することも可能です。
+        インデックス可能な型はインデックスシグネチャを持ち、これはインデックスされた際に、
+        対応する戻り値の型と連動して、オブジェクトにインデックスを使用できる型であることを表します。
+        例を確認してみましょう。
+      </p>
+
+      <pre><code>interface StringArray {
+    [index: number]: string;
+}
+let myArray: StringArray;
+myArray = ["Bob", "Fred"];
+let myStr: string = myArray[0];
+</code></pre>
+
+      <p>
+        Above, we have a StringArray interface that has an index signature. This
+        index signature states that when a StringArray is indexed with a number,
+        it will return a string.
+      </p>
+
+      <p>
+        上記で、インデックスシグネチャを持つStringArrayを定義しています。
+        ここでのStringArrayのインデックスシグネチャの状態は、数値によってインデックス化され、文字列を返すようになっています。
+      </p>
+
+      <p>
+        There are two types of supported index signatures: string and number. It
+        is possible to support both types of indexers, but the type returned
+        from a numeric indexer must be a subtype of the type returned from the
+        string indexer. This is because when indexing with a number, JavaScript
+        will actually convert that to a string before indexing into an object.
+        That means that indexing with 100 (a number) is the same thing as
+        indexing with "100" (a string), so the two need to be consistent.
+      </p>
+
+      <p>
+        インデックスシグネチャは、文字列(string)と数値(number)の2つの型がサポートされます。
+        インデックスには両方の型のサポートが可能ですが、
+        数値インデックスから返される値の型は、文字列インデックスから返される値の型の部分型(subtype)でなければいけません。
+        何故なら、数値によるインデックス化を行った場合、
+        JavaScriptは実際にはオブジェクトへのインデックス化を行う前に、それを文字列に変換するからです。
+        つまり、(数値の)100のインデックス化は、(文字列の)"100"でインデックス化したことと同義であるため、
+        両者には一貫性がなければいけません。
+      </p>
+
+      <pre><code>class Animal {
+        name: string;
+    }
+    class Dog extends Animal {
+        breed: string;
+    }
+    
+    // Error: indexing with a numeric string might get you a completely separate type of Animal!
+interface NotOkay {
+    [x: number]: Animal;
+    [x: string]: Dog;
+}</code></pre>
+    </section>
+
+    <section>
+      <h2>Indexable Types</h2>
+      <p>
+        Similarly to how we can use interfaces to describe function types, we
+        can also describe types that we can “index into” like a[10], or
+        ageMap["daniel"]. Indexable types have an index signature that describes
+        the types we can use to index into the object, along with the
+        corresponding return types when indexing. Let’s take an example:
+      </p>
+
+      <p>
+        関数型を記述するインターフェースが使用できるのと同様に、
+        a[10]またはageMap["daniel"]のようなインデックス可能な型を記述することも可能です。
+        インデックス可能な型はインデックスシグネチャを持ち、これはインデックスされた際に、
+        対応する戻り値の型と連動して、オブジェクトにインデックスを使用できる型であることを表します。
+        例を確認してみましょう。
+      </p>
+
+      <pre><code>interface StringArray {
+    [index: number]: string;
+}
+
+let myArray: StringArray;
+myArray = ["Bob", "Fred"];
+
+let myStr: string = myArray[0];</code></pre>
+
+      <p>
+        Above, we have a StringArray interface that has an index signature. This
+        index signature states that when a StringArray is indexed with a number,
+        it will return a string.
+      </p>
+
+      <p>
+        上記で、インデックスシグネチャを持つStringArrayを定義しています。
+        ここでのStringArrayのインデックスシグネチャの状態は、数値によってインデックス化され、文字列を返すようになっています。
+      </p>
+
+      <p>
+        There are two types of supported index signatures: string and number. It
+        is possible to support both types of indexers, but the type returned
+        from a numeric indexer must be a subtype of the type returned from the
+        string indexer. This is because when indexing with a number, JavaScript
+        will actually convert that to a string before indexing into an object.
+        That means that indexing with 100 (a number) is the same thing as
+        indexing with "100" (a string), so the two need to be consistent.
+      </p>
+      <p>
+        インデックスシグネチャは、文字列(string)と数値(number)の2つの型がサポートされます。
+        インデックスには両方の型のサポートが可能ですが、
+        数値インデックスから返される値の型は、文字列インデックスから返される値の型の部分型(subtype)でなければいけません。
+        何故なら、数値によるインデックス化を行った場合、
+        JavaScriptは実際にはオブジェクトへのインデックス化を行う前に、それを文字列に変換するからです。
+        つまり、(数値の)100のインデックス化は、(文字列の)"100"でインデックス化したことと同義であるため、
+        両者には一貫性がなければいけません。
+      </p>
+      <pre><code>class Animal {
+    name: string;
+}
+class Dog extends Animal {
+    breed: string;
+}
+
+// Error: indexing with a numeric string might get you a completely separate type of Animal!
+interface NotOkay {
+    [x: number]: Animal;
+    [x: string]: Dog;
+}</code></pre>
+
+      <p>
+        While string index signatures are a powerful way to describe the
+        “dictionary” pattern, they also enforce that all properties match their
+        return type. This is because a string index declares that obj.property
+        is also available as obj["property"]. In the following example, name’s
+        type does not match the string index’s type, and the type-checker gives
+        an error:
+      </p>
+
+      <p>
+        文字列インデックスシグネチャは"dictionary"(辞書)パターンを表す方法として強力である一方、
+        全てのプロパティをそれらの戻り値の型と一致させることを強制します。
+        何故なら、文字列インデックスの宣言obj.propertyは、obj["property"]としても利用できるからです。
+        下記の例では、nameの型は文字列indexの方と一致しないため、
+        型チェッカーはエラーを発生させます。
+      </p>
+
+      <pre><code>interface NumberDictionary {
+    [index: string]: number;
+    length: number;    // ok, length is a number
+    name: string;      // error, the type of 'name' is not a subtype of the indexer
+}</code></pre>
+
+      <p>
+        Finally, you can make index signatures readonly in order to prevent
+        assignment to their indices:
+      </p>
+      <p>
+        最後に、割り当てを防ぐために、インデックスシグネチャを読み取り専用にする方法を紹介します。
+      </p>
+      <pre><code>interface ReadonlyStringArray {
+    readonly [index: number]: string;
+}
+let myArray: ReadonlyStringArray = ["Alice", "Bob"];
+myArray[2] = "Mallory"; // error!</code></pre>
+
+      <p>
+        You can’t set myArray[2] because the index signature is readonly.
+      </p>
+      <p>
+        インデックスシグネチャが読み取り専用であるため、myArray[2]へ割り当てすることはできません。
+      </p>
+    </section>
+
+    <section>
+      <h2>Class Types</h2>
+      <p></p>
+
+      <section>
+        <h3>Implementing an interface インターフェースの実装</h3>
+        <p>
+          One of the most common uses of interfaces in languages like C# and
+          Java, that of explicitly enforcing that a class meets a particular
+          contract, is also possible in TypeScript.
+        </p>
+        <p>
+          C#とJavaのような言語での最も一般的なインターフェースの使われ方のひとつに、
+          クラスが明示的に特定の条件を満たすことを強制させるというものがあり、それはTypeScriptでも可能です。
+        </p>
+        <pre><code>interface ClockInterface {
+    currentTime: Date;
+}
+
+class Clock implements ClockInterface {
+    currentTime: Date;
+    constructor(h: number, m: number) { }
+}</code></pre>
+
+        <p>
+          You can also describe methods in an interface that are implemented in
+          the class, as we do with setTime in the below example:
+        </p>
+        <p>
+          以下の例でsetTimeを使用して行うように、クラスに実装されているインターフェース内のメソッドを記述することもできます。
+        </p>
+        <pre><code>interface ClockInterface {
+    currentTime: Date;
+    setTime(d: Date);
+}
+
+class Clock implements ClockInterface {
+    currentTime: Date;
+    setTime(d: Date) {
+        this.currentTime = d;
+    }
+    constructor(h: number, m: number) { }
+}</code></pre>
+        <p>
+          Interfaces describe the public side of the class, rather than both the
+          public and private side. This prohibits you from using them to check
+          that a class also has particular types for the private side of the
+          class instance.
+        </p>
+        <p>
+          インターフェースにはクラスのpublic、privateの両方ではなく、publicだけが記述されます。
+          これは、クラスのインスタンスのprivateに、クラスが特定の型を持たせているかチェックすることを禁止します。
+        </p>
+      </section>
+      <section>
+        <h3>
+          Difference between the static and instance sides of classes
+          クラスの静的側とインスタンス側の違い
+        </h3>
+        <p>
+          When working with classes and interfaces, it helps to keep in mind
+          that a class has two types: the type of the static side and the type
+          of the instance side. You may notice that if you create an interface
+          with a construct signature and try to create a class that implements
+          this interface you get an error:
+        </p>
+        <p>
+          クラスとインターフェースを使用することで、
+          クラスが2つの型、「静的側の型」と「インスタンス側の型」を持つことを意識させる手助けとなってくれます。
+          あなたは、constructシグネチャ(constructor)のあるインターフェースを作成し、このインターフェースを実装したクラスを作成しようとすると、
+          エラーが発生することに気づいているかもしれません。
+        </p>
+        <pre><code>interface ClockConstructor {
+    new (hour: number, minute: number);
+}
+
+class Clock implements ClockConstructor {
+    currentTime: Date;
+    constructor(h: number, m: number) { }
+}</code></pre>
+
+        <p>
+          This is because when a class implements an interface, only the
+          instance side of the class is checked. Since the constructor sits in
+          the static side, it is not included in this check.
+        </p>
+        <p>
+          これは、クラスがインタフェースを実装するときに、クラスのインスタンス側のみがチェックされるためです。コンストラクタは静的側にあるため、このチェックには含まれていません。
+        </p>
+
+        <p>
+          Instead, you would need to work with the static side of the class
+          directly. In this example, we define two interfaces, ClockConstructor
+          for the constructor and ClockInterface for the instance methods. Then
+          for convenience we define a constructor function createClock that
+          creates instances of the type that is passed to it.
+        </p>
+
+        <p>
+          代わりに、クラスの静的側に直接それを行う必要があります。
+          この例では、2つのインターフェースを定義し、
+          ClockConstructorはconstructorのためのもので、
+          ClockInterfaceはインスタンスメソッドのためのものになります。
+          ここでは便宜上のため、渡された型のインスタンスを作成するconstructor関数createClockを定義しています。
+        </p>
+        <pre><code>interface ClockConstructor {
+    new (hour: number, minute: number): ClockInterface;
+}
+interface ClockInterface {
+    tick();
+}
+
+function createClock(ctor: ClockConstructor, hour: number, minute: number): ClockInterface {
+    return new ctor(hour, minute);
+}
+
+class DigitalClock implements ClockInterface {
+    constructor(h: number, m: number) { }
+    tick() {
+        console.log("beep beep");
+    }
+}
+class AnalogClock implements ClockInterface {
+    constructor(h: number, m: number) { }
+    tick() {
+        console.log("tick tock");
+    }
+}
+
+let digital = createClock(DigitalClock, 12, 17);
+let analog = createClock(AnalogClock, 7, 32);
+        </code></pre>
+
+        <p>
+          Because createClock’s first parameter is of type ClockConstructor, in
+          createClock(AnalogClock, 7, 32), it checks that AnalogClock has the
+          correct constructor signature.
+        </p>
+        <p>
+          createClockのひとつめの引数はClockConstructor型であるため、
+          createClock(AnalogClock, 7, 32)であれば、
+          AnalogClockが正しいconstructorシグネチャを持っているかチェックされます。
+        </p>
+      </section>
+    </section>
+
+    <section>
+      <h2>Extending Interfaces インターフェースの拡張</h2>
+      <p>
+        Like classes, interfaces can extend each other. This allows you to copy
+        the members of one interface into another, which gives you more
+        flexibility in how you separate your interfaces into reusable
+        components.
+      </p>
+      <p>
+        クラスのように、インターフェースは拡張することが可能です。
+        これにより、あるインターフェースのメンバを別のものにコピーすることが可能になり、
+        インターフェースを再利用性のある部品へ柔軟に分離できるようにしてくれます。
+      </p>
+      <pre><code>interface Shape {
+    color: string;
+}
+
+interface Square extends Shape {
+    sideLength: number;
+}
+
+let square = &lt;Square&gt;{};
+square.color = "blue";
+square.sideLength = 10;</code></pre>
+
+      <p>
+        An interface can extend multiple interfaces, creating a combination of
+        all of the interfaces.
+      </p>
+      <p>
+        インターフェースは複数のインターフェースを拡張することが可能で、全てのインターフェースを結合したものを作成します。
+      </p>
+      <pre><code>interface Shape {
+    color: string;
+}
+
+interface PenStroke {
+    penWidth: number;
+}
+
+interface Square extends Shape, PenStroke {
+    sideLength: number;
+}
+
+let square = &lt;Square&gt;{};
+square.color = "blue";
+square.sideLength = 10;
+square.penWidth = 5.0;</code></pre>
+    </section>
+
+    <section>
+      <h2>Hybrid Types ハイブリッド型</h2>
+      <p>
+        As we mentioned earlier, interfaces can describe the rich types present
+        in real world JavaScript. Because of JavaScript’s dynamic and flexible
+        nature, you may occasionally encounter an object that works as a
+        combination of some of the types described above.
+      </p>
+      <p>
+        これまで述べてきたように、インターフェースは実際の世界のJavaScriptが提供する豊富な型を記述(説明)することを可能にします。
+        JavaScriptは動的且つ柔軟な性質を持つことから、あなたは前述された型の組み合わせで動作するオブジェクトを見かけたことがあるかもしれません。
+      </p>
+      <p>
+        One such example is an object that acts as both a function and an
+        object, with additional properties:
+      </p>
+      <p>
+        下記はそのような例のひとつになります。
+        特定のプロパティによって、関数としてもオブジェクトとしても振る舞うオブジェクトになります
+      </p>
+      <pre><code>interface Counter {
+    (start: number): string;
+    interval: number;
+    reset(): void;
+}
+
+function getCounter(): Counter {
+    let counter = &lt;Counter&gt;function (start: number) { };
+    counter.interval = 123;
+    counter.reset = function () { };
+    return counter;
+}
+
+let c = getCounter();
+c(10);
+c.reset();
+c.interval = 5.0;</code></pre>
+
+      <p>
+        When interacting with 3rd-party JavaScript, you may need to use patterns
+        like the above to fully describe the shape of the type.
+      </p>
+      <p>
+        サードパーティのJavaScriptと対話するとき、あなたはタイプの形を完全に記述するために上記のようなパターンを使う必要があるかもしれません。
+      </p>
+    </section>
+
+    <section>
+      <h2>Interfaces Extending Classes</h2>
+      <p>
+        When an interface type extends a class type it inherits the members of
+        the class but not their implementations. It is as if the interface had
+        declared all of the members of the class without providing an
+        implementation. Interfaces inherit even the private and protected
+        members of a base class. This means that when you create an interface
+        that extends a class with private or protected members, that interface
+        type can only be implemented by that class or a subclass of it.
+      </p>
+      <p>
+        インターフェースの型がクラスの型を拡張する場合、クラスのメンバを継承しますが、その実装の中身は継承されません。
+        これは、そのインターフェースが、提供される実装を抜きに、そのクラスの全メンバ宣言を持っているかのように振る舞います。
+        インターフェースは基盤となるクラスのprivateとprotectedメンバさえも継承します。
+        これは、privateとprotectedのメンバを持つクラスを拡張したインターフェースを作成する際は、
+        インターフェースの型はそのクラス、またはそのクラスのサブクラスによってのみ実装可能であることを意味します。
+      </p>
+      <p>
+        This is useful when you have a large inheritance hierarchy, but want to
+        specify that your code works with only subclasses that have certain
+        properties. The subclasses don’t have to be related besides inheriting
+        from the base class. For example:
+      </p>
+      <p>
+        これは、大規模な継承階層を持つが、
+        コードは特定のプロパティを持つサブクラスのみで動作するように指定したい場合に便利です。
+        サブクラスは、基底クラスからの継承以外の関連付けは不要です。 例えば
+      </p>
+
+      <pre><code>class Control {
+    private state: any;
+}
+
+interface SelectableControl extends Control {
+    select(): void;
+}
+
+class Button extends Control implements SelectableControl {
+    select() { }
+}
+
+class TextBox extends Control {
+    select() { }
+}
+
+// Error: Property 'state' is missing in type 'Image'.
+class Image implements SelectableControl {
+    select() { }
+}
+
+class Location {
+
+}</code></pre>
+
+      <p>
+        In the above example, SelectableControl contains all of the members of
+        Control, including the private state property. Since state is a private
+        member it is only possible for descendants of Control to implement
+        SelectableControl. This is because only descendants of Control will have
+        a state private member that originates in the same declaration, which is
+        a requirement for private members to be compatible.
+      </p>
+      <p>
+        上記の例では、SelectableControlはprivateのstateプロパティを含め、
+        Controlの全てのメンバを含みます。 stateはprivateのメンバであるため、
+        これだけがControlの子孫としてSelectableControlに実装されることが可能です。
+        何故なら、Controlの子孫のみが同じ宣言から生じたprivateなstateメンバを持ち、
+        互換性のためにprivateなメンバであることが必要とされるからです。
+      </p>
+      <p>
+        Within the Control class it is possible to access the state private
+        member through an instance of SelectableControl. Effectively, a
+        SelectableControl acts like a Control that is known to have a select
+        method. The Button and TextBox classes are subtypes of SelectableControl
+        (because they both inherit from Control and have a select method), but
+        the Image and Location classes are not.
+      </p>
+      <p>
+        Controlクラスにおいては、
+        SelectableControlのインスタンスを通してprivateメンバであるstateにアクセスすることが可能です。
+        実際には、SelectableControlがselectメソッドを持つControlのように振る舞います。
+        ButtonとTextBoxはSelectableControlの部分型(subtype)ですが
+        (どちらもControlを継承し、selectメソッドを持つため)、
+        ImageとLocationはそうではありません。
+      </p>
+    </section>
+
+    <section>
+      <h2></h2>
+      <p></p>
+    </section>
+
+    <section>
+      <h2></h2>
+      <p></p>
+    </section>
+
+    <script src="./dst/interfaces.js"></script>
+  </body>
+</html>
