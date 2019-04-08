@@ -20,6 +20,7 @@ for (var _a = 0, listFor_1 = listFor; _a < listFor_1.length; _a++) {
 }
 /**
  * set
+ * if es6, this code becomes success.
  */
 var pets = new Set(["Cat", "Dog", "Hamster"]);
 pets["species"] = "mammals";

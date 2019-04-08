@@ -8,5 +8,6 @@ declare let someArray: (string | number | boolean)[];
 declare let listFor: number[];
 /**
  * set
+ * if es6, this code becomes success.
  */
 declare let pets: any;
