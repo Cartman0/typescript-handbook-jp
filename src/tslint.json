@@ -28,7 +28,9 @@
     "array-type": [false],
     "no-unused-expression": [false],
     "no-bitwise": [false],
-    "arrow-parens": [false]
+    "arrow-parens": [false],
+    "forin": [false],
+    "no-string-literal": [false]
   },
   "rulesDirectory": []
 }

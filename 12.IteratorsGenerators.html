@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Iterators and Generators</title>
+  </head>
+  <body>
+    <h1>
+      Iterators and Generators
+    </h1>
+
+    <section>
+      <h2>Iterables イテレーターとジェネレーター</h2>
+      <p>
+        An object is deemed iterable if it has an implementation for the
+        <code>Symbol.iterator</code> property. Some built-in types like Array,
+        Map, Set, String, Int32Array, Uint32Array, etc. have their
+        Symbol.iterator property already implemented.
+        <code>Symbol.iterator</code> function on an object is responsible for
+        returning the list of values to iterate on.
+      </p>
+      <p>
+        オブジェクトがSymbol.iteratorプロパティを実装する場合、そのオブジェクトは反復可能(iterable)であるとみなされます。
+        Array、Map、Set、String、Int32Array、Uint32Array等の幾つかの組み込みの型には、
+        予めSymbol.iteratorプロパティが実装されており、
+        オブジェクトのSymbol.iterator関数は、反復処理上で値のリストを返すことを保証します。
+      </p>
+      <p></p>
+
+      <section>
+        <h3>for..of statements</h3>
+        <p>
+          for..of loops over an iterable object, invoking the Symbol.iterator
+          property on the object. Here is a simple for..of loop on an array:
+        </p>
+
+        <p>
+          for..ofは反復可能なオブジェクトの繰り返し処理を行う際に、Symbol.iteratorプロパティを実行します。
+          下記は配列でのシンプルなfor..ofの繰り返し処理になります。
+        </p>
+
+        <pre><code>let someArray = [1, "string", false];
+
+for (let entry of someArray) {
+    console.log(entry); // 1, "string", false
+}</code></pre>
+      </section>
+
+      <section>
+        <h3>for..of vs. for..in statements</h3>
+        <p>
+          Both for..of and for..in statements iterate over lists; the values
+          iterated on are different though, for..in returns a list of keys on
+          the object being iterated, whereas for..of returns a list of values of
+          the numeric properties of the object being iterated.
+        </p>
+        <p>
+          for..ofとfor..in文は、どちらもリストを繰り返し処理するものですが、その繰り返す値が異なり、
+          for..inはオブジェクトのキーのリストを返しますが、
+          for..ofはオブジェクトの数値プロパティの値のリストを返します。
+        </p>
+        <p>
+          Here is an example that demonstrates this distinction:
+        </p>
+        <p>
+          両者の違いのデモを下記に示します。
+        </p>
+
+        <pre><code>let list = [4, 5, 6];
+for (let i in list) {
+   console.log(i); // "0", "1", "2",
+}
+for (let i of list) {
+   console.log(i); // "4", "5", "6"
+}</code></pre>
+
+        <blockquote>
+          <p>
+            ※forinの場合，toStringなど継承されたプロパティもみてしまう．
+            直接のプロパティも見れるように<code>.hasOwnProperty</code>を使う．
+          </p>
+          <p>
+            参考：<a
+              href="https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Object/hasOwnProperty"
+              >https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference/Global_Objects/Object/hasOwnProperty</a
+            >
+          </p>
+          <p>
+            推奨の書き方：
+          </p>
+
+          <pre><code>for (let key in someObject) {
+if (someObject.hasOwnProperty(key)) {
+    // code here
+}
+}</code></pre>
+        </blockquote>
+
+        <p>
+          Another distinction is that <code>for..in</code> operates on any
+          object; it serves as a way to inspect properties on this object.
+          for..of on the other hand, is mainly interested in values of iterable
+          objects. Built-in objects like Map and Set implement Symbol.iterator
+          property allowing access to stored values.
+        </p>
+        <p>
+          その他の違いにfor..inは任意のオブジェクト上で、
+          そのオブジェクトのプロパティを調べる方法を提供します。
+          一方、for..ofは反復可能なオブジェクトの値に主眼を置いています。
+          MapやSetなどの組み込みオブジェクトは、格納された値にアクセスするためのSymbol.iteratorプロパティを実装しています。
+        </p>
+
+        <pre><code>let pets = new Set(["Cat", "Dog", "Hamster"]);
+pets["species"] = "mammals";
+
+for (let pet in pets) {
+    console.log(pet); // "species"
+}
+
+for (let pet of pets) {
+    console.log(pet); // "Cat", "Dog", "Hamster"
+}</code></pre>
+      </section>
+
+      <section>
+        <h3>Code generation Targeting ES5 and ES3</h3>
+        <p>
+          When targeting an ES5 or ES3, iterators are only allowed on values of
+          Array type. It is an error to use for..of loops on non-Array values,
+          even if these non-Array values implement the
+          <code>Symbol.iterator</code> property.
+        </p>
+        <p>
+          ES5またはES3をターゲットとする場合、iteratorsはArray型の値に対してのみ許可されています。
+          これらのnon-Arrayの値がSymbol.iteratorプロパティを実装していても、
+          non-Arrayの値に対してfor..ofループを使用するのはエラーです。
+        </p>
+        <p>
+          The compiler will generate a simple for loop for a for..of loop, for
+          instance:
+        </p>
+        <p>
+          コンパイラはfor..ofループに対して単純なforループを生成します。例えば：
+        </p>
+        <pre><code>let numbers = [1, 2, 3];
+for (let num of numbers) {
+    console.log(num);
+}</code></pre>
+
+        <p>
+          will be generated as:
+        </p>
+
+        <pre><code>var numbers = [1, 2, 3];
+for (var _i = 0; _i < numbers.length; _i++) {
+    var num = numbers[_i];
+    console.log(num);
+}</code></pre>
+      </section>
+
+      <section>
+        <h3>Targeting ECMAScript 2015 and higher</h3>
+        <p>
+          When targeting an ECMAScipt 2015-compliant engine, the compiler will
+          generate <code>for..of</code> loops to target the built-in iterator
+          implementation in the engine.
+        </p>
+        <p>
+          ECMAScipt 2015に準拠したエンジンを対象とする場合、
+          コンパイラは,そのエンジンに実装されている組み込みのイテレーターを対象としてfor..ofを生成します。
+        </p>
+      </section>
+    </section>
+  </body>
+</html>
