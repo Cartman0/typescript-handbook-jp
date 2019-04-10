@@ -30,7 +30,8 @@
     "no-bitwise": [false],
     "arrow-parens": [false],
     "forin": [false],
-    "no-string-literal": [false]
+    "no-string-literal": [false],
+    "no-reference": [false]
   },
   "rulesDirectory": []
 }
