@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Declaration Merging</h1>
+
+    <section>
+      <h2>Introduction</h2>
+      <p>
+        Some of the unique concepts in TypeScript describe the shape of
+        JavaScript objects at the type level. One example that is especially
+        unique to TypeScript is the concept of ‘declaration merging’.
+        Understanding this concept will give you an advantage when working with
+        existing JavaScript. It also opens the door to more advanced abstraction
+        concepts.
+      </p>
+
+      <p>
+        TypeScriptの唯一の概念の中には、JavaScriptオブジェクトの形を型レベルで説明するものがあります。
+        TypeScriptに特に特有の例の1つは、「宣言のマージ」の概念です。
+        この概念を理解すると、既存のJavaScriptを使用する際に有利になります。
+        それはまた、より高度な抽象概念への扉を開きます。
+      </p>
+
+      <p>
+        For the purposes of this article, “declaration merging” means that the
+        compiler merges two separate declarations declared with the same name
+        into a single definition. This merged definition has the features of
+        both of the original declarations. Any number of declarations can be
+        merged; it’s not limited to just two declarations.
+      </p>
+      <p>
+        この記事の目的として、「宣言のマージ」とは、
+        コンパイラが同じ名前で宣言された2つの別々の宣言を単一の定義にマージすることを意味します。
+        このマージされた定義は両方の元の宣言の機能を持ちます。
+        宣言はいくつでもマージできます。 2つの宣言だけに限定されていません。
+      </p>
+    </section>
+
+    <section>
+      <h2>Basic Concepts</h2>
+      <p>
+        In TypeScript, a declaration creates entities in at least one of three
+        groups: namespace, type, or value. Namespace-creating declarations
+        create a namespace, which contains names that are accessed using a
+        dotted notation. Type-creating declarations do just that: they create a
+        type that is visible with the declared shape and bound to the given
+        name. Lastly, value-creating declarations create values that are visible
+        in the output JavaScript.
+      </p>
+
+      <p>
+        TypeScriptでは、宣言によって、名前空間、型、または値の3つのグループのうちの少なくとも1つにエンティティが作成されます。
+        名前空間を作成する宣言は、ドット表記法を使用してアクセスされる名前を含む名前空間を作成します。
+        型作成宣言は、まさにそれをします：それらは宣言された形で見えて、与えられた名前に束縛される型を作成します。
+        最後に、値作成宣言は、出力JavaScriptに表示される値を作成します。
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Declaration Type</th>
+            <th style="text-align: center">Namespace</th>
+            <th style="text-align: center">Type</th>
+            <th style="text-align: center">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Namespace</td>
+            <td style="text-align: center">X</td>
+            <td style="text-align: center">&nbsp;</td>
+            <td style="text-align: center">X</td>
+          </tr>
+          <tr>
+            <td>Class</td>
+            <td style="text-align: center">&nbsp;</td>
+            <td style="text-align: center">X</td>
+            <td style="text-align: center">X</td>
+          </tr>
+          <tr>
+            <td>Enum</td>
+            <td style="text-align: center">&nbsp;</td>
+            <td style="text-align: center">X</td>
+            <td style="text-align: center">X</td>
+          </tr>
+          <tr>
+            <td>Interface</td>
+            <td style="text-align: center">&nbsp;</td>
+            <td style="text-align: center">X</td>
+            <td style="text-align: center">&nbsp;</td>
+          </tr>
+          <tr>
+            <td>Type Alias</td>
+            <td style="text-align: center">&nbsp;</td>
+            <td style="text-align: center">X</td>
+            <td style="text-align: center">&nbsp;</td>
+          </tr>
+          <tr>
+            <td>Function</td>
+            <td style="text-align: center">&nbsp;</td>
+            <td style="text-align: center">&nbsp;</td>
+            <td style="text-align: center">X</td>
+          </tr>
+          <tr>
+            <td>Variable</td>
+            <td style="text-align: center">&nbsp;</td>
+            <td style="text-align: center">&nbsp;</td>
+            <td style="text-align: center">X</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>
+        Understanding what is created with each declaration will help you
+        understand what is merged when you perform a declaration merge.
+        各宣言で何が作成されるのかを理解すると、宣言マージを実行するときに何がマージされるのかを理解するのに役立ちます。
+      </p>
+
+      <p></p>
+    </section>
+
+    <section>
+      <h2>Merging Interfaces</h2>
+      <p>
+        The simplest, and perhaps most common, type of declaration merging is
+        interface merging. At the most basic level, the merge mechanically joins
+        the members of both declarations into a single interface with the same
+        name.
+      </p>
+      <p>
+        最も単純で、おそらく最も一般的なタイプの宣言マージは、インタフェースマージです。
+        最も基本的なレベルでは、マージは両方の宣言のメンバーを同じ名前の単一のインターフェースに機械的に結合します。
+      </p>
+
+      <pre><code>interface Box {
+    height: number;
+    width: number;
+}
+
+interface Box {
+    scale: number;
+}
+
+let box: Box = {height: 5, width: 6, scale: 10};</code></pre>
+
+      <p>
+        Non-function members of the interfaces should be unique. If they are not
+        unique, they must be of the same type. The compiler will issue an error
+        if the interfaces both declare a non-function member of the same name,
+        but of different types.
+      </p>
+
+      <p>
+        インターフェースの非関数メンバは固有でなければなりません。
+        それらが固有ではない場合、それらは同じタイプでなければなりません。
+        インターフェースが両方とも同じ名前の、
+        しかし異なるタイプの非関数メンバを宣言すると、
+        コンパイラはエラーを出します。
+      </p>
+
+      <p>
+        For function members, each function member of the same name is treated
+        as describing an overload of the same function. Of note, too, is that in
+        the case of interface A merging with later interface A, the second
+        interface will have a higher precedence than the first.
+      </p>
+
+      <p>
+        関数メンバの場合、同じ名前の各関数メンバは、同じ関数のオーバーロードを表すものとして扱われます。
+        また、インターフェイスAが後のインターフェイスAとマージする場合、2番目のインターフェイスが最初のインターフェイスよりも優先順位が高くなります。
+      </p>
+
+      <p>
+        That is, in the example:
+      </p>
+
+      <pre><code>interface Cloner {
+    clone(animal: Animal): Animal;
+}
+
+interface Cloner {
+    clone(animal: Sheep): Sheep;
+}
+
+interface Cloner {
+    clone(animal: Dog): Dog;
+    clone(animal: Cat): Cat;
+}</code></pre>
+
+      <p>
+        The three interfaces will merge to create a single declaration as so:
+      </p>
+      <p>
+        3つのインタフェースは、以下のように1つの宣言を作成するためにマージされます。
+      </p>
+
+      <pre><code>interface Cloner {
+    clone(animal: Dog): Dog;
+    clone(animal: Cat): Cat;
+    clone(animal: Sheep): Sheep;
+    clone(animal: Animal): Animal;
+}</code></pre>
+
+      <p>
+        Notice that the elements of each group maintains the same order, but the
+        groups themselves are merged with later overload sets ordered first.
+      </p>
+      <p>
+        各グループの要素は同じ順序を維持していますが、グループ自体は最初に順序付けられた後のオーバーロードセットとマージされています。
+      </p>
+
+      <p>
+        One exception to this rule is specialized signatures. If a signature has
+        a parameter whose type is a single string literal type (e.g. not a union
+        of string literals), then it will be bubbled toward the top of its
+        merged overload list.
+      </p>
+      <p>
+        この規則の1つの例外は特殊化されたシグネチャです。
+        シグニチャが単一の文字列リテラル型
+        （たとえば、文字列リテラルの和集合ではない）であるパラメータを持つ場合、そのマージされたオーバーロードリストの先頭に向かってバブルされます。
+      </p>
+
+      <p>
+        For instance, the following interfaces will merge together:
+      </p>
+      <pre><code>interface Document {
+    createElement(tagName: any): Element;
+}
+interface Document {
+    createElement(tagName: "div"): HTMLDivElement;
+    createElement(tagName: "span"): HTMLSpanElement;
+}
+interface Document {
+    createElement(tagName: string): HTMLElement;
+    createElement(tagName: "canvas"): HTMLCanvasElement;
+}</code></pre>
+
+      <p>
+        The resulting merged declaration of Document will be the following:
+        結果として生じるDocumentのマージ宣言は次のようになります。
+      </p>
+      <pre><code>interface Document {
+    createElement(tagName: "canvas"): HTMLCanvasElement;
+    createElement(tagName: "div"): HTMLDivElement;
+    createElement(tagName: "span"): HTMLSpanElement;
+    createElement(tagName: string): HTMLElement;
+    createElement(tagName: any): Element;
+}</code></pre>
+    </section>
+
+    <section>
+      <h2>Merging Namespaces</h2>
+
+      <p>
+        Similarly to interfaces, namespaces of the same name will also merge
+        their members. Since namespaces create both a namespace and a value, we
+        need to understand how both merge.
+      </p>
+
+      <p>
+        インターフェースと同様に、同じ名前のネームスペースもそのメンバをマージします。
+        名前空間は名前空間と値の両方を作成するので、両者がどのように結合するかを理解する必要があります。
+      </p>
+
+      <p>
+        To merge the namespaces, type definitions from exported interfaces
+        declared in each namespace are themselves merged, forming a single
+        namespace with merged interface definitions inside.
+      </p>
+
+      <p>
+        名前空間をマージするために、各名前空間で宣言されているエクスポートされたインタフェースからの型定義はそれら自身がマージされ、内部にマージされたインタフェース定義を持つ単一の名前空間を形成します。
+      </p>
+      <p>
+        To merge the namespace value, at each declaration site, if a namespace
+        already exists with the given name, it is further extended by taking the
+        existing namespace and adding the exported members of the second
+        namespace to the first.
+      </p>
+
+      <p>
+        名前空間をマージするために、
+        各名前空間で宣言されているエクスポートされたインタフェースからの型定義はそれら自身がマージされ、
+        内部にマージされたインタフェース定義を持つ単一の名前空間を形成します。
+      </p>
+      <p>The declaration merge of <code>Animals</code> in this example:</p>
+      <p>
+        この例では、Animalsの宣言マージは次のとおりです。
+      </p>
+
+      <pre><code>namespace Animals {
+    export class Zebra { }
+}
+
+namespace Animals {
+    export interface Legged { numberOfLegs: number; }
+    export class Dog { }
+}</code></pre>
+
+      <p>
+        is equivalent to:
+      </p>
+
+      <pre><code>namespace Animals {
+    export interface Legged { numberOfLegs: number; }
+
+    export class Zebra { }
+    export class Dog { }
+}</code></pre>
+
+      <p>
+        This model of namespace merging is a helpful starting place, but we also
+        need to understand what happens with non-exported members. Non-exported
+        members are only visible in the original (un-merged) namespace. This
+        means that after merging, merged members that came from other
+        declarations cannot see non-exported members.
+      </p>
+
+      <p>
+        この名前空間マージのモデルは役に立つ出発点ですが、エクスポートされていないメンバーで何が起こるのかも理解する必要があります。
+        エクスポートされていないメンバーは、元の（マージされていない）ネームスペースにのみ表示されます。
+        つまり、マージ後、他の宣言からのマージメンバーはエクスポートされていないメンバーを見ることができません。
+      </p>
+
+      <p>
+        We can see this more clearly in this example:
+      </p>
+
+      <p>
+        この例では、これがより明確にわかります。
+      </p>
+
+      <pre><code>namespace Animal {
+    let haveMuscles = true;
+
+    export function animalsHaveMuscles() {
+        return haveMuscles;
+    }
+}
+
+namespace Animal {
+    export function doAnimalsHaveMuscles() {
+        return haveMuscles;  // Error, because haveMuscles is not accessible here
+    }
+}</code></pre>
+
+      <p>
+        Because haveMuscles is not exported, only the animalsHaveMuscles
+        function that shares the same un-merged namespace can see the symbol.
+        The doAnimalsHaveMuscles function, even though it’s part of the merged
+        Animal namespace can not see this un-exported member.
+      </p>
+
+      <p>
+        haveMusclesはエクスポートされないので、
+        同じマージされていない名前空間を共有するanimalsHaveMuscles関数だけがシンボルを見ることができます。
+        doAnimalsHaveMuscles関数は、マージされたAnimalネームスペースの一部ですが、
+        このエクスポートされていないメンバーを見ることはできません。
+      </p>
+    </section>
+
+    <section>
+      <h2>Merging Namespaces with Classes, Functions, and Enums</h2>
+
+      <p>
+        Namespaces are flexible enough to also merge with other types of
+        declarations. To do so, the namespace declaration must follow the
+        declaration it will merge with. The resulting declaration has properties
+        of both declaration types. TypeScript uses this capability to model some
+        of the patterns in JavaScript as well as other programming languages.
+      </p>
+      <p>
+        名前空間は、他の種類の宣言ともマージするのに十分柔軟です。
+        そうするために、名前空間宣言はそれがマージする宣言に従わなければなりません。
+        結果の宣言は、両方の宣言タイプのプロパティを持ちます。
+        TypeScriptはこの機能を使用して、JavaScriptや他のプログラミング言語の一部のパターンをモデル化します。
+      </p>
+
+      <section>
+        <h3>Merging Namespaces with Classes</h3>
+        <p>
+          This gives the user a way of describing inner classes.
+        </p>
+
+        <p>
+          これはユーザに内部クラスを記述する方法を与えます。
+        </p>
+        <pre><code>class Album {
+    label: Album.AlbumLabel;
+}
+namespace Album {
+    export class AlbumLabel { }
+}</code></pre>
+
+        <p>
+          The visibility rules for merged members is the same as described in
+          the ‘Merging Namespaces’ section, so we must export the AlbumLabel
+          class for the merged class to see it. The end result is a class
+          managed inside of another class. You can also use namespaces to add
+          more static members to an existing class.
+        </p>
+
+        <p>
+          マージされたメンバーの表示ルールは「名前空間のマージ」セクションで説明されているものと同じであるため、それを表示するにはマージされたクラスのAlbumLabelクラスをエクスポートする必要があります。
+          その結果、別のクラスの内部でクラスが管理されます。
+          名前空間を使用して、既存のクラスに静的メンバーを追加することもできます。
+        </p>
+
+        <p>
+          In addition to the pattern of inner classes, you may also be familiar
+          with the JavaScript practice of creating a function and then extending
+          the function further by adding properties onto the function.
+          TypeScript uses declaration merging to build up definitions like this
+          in a type-safe way.
+        </p>
+
+        <p>
+          内部クラスのパターンに加えて、関数を作成し、その関数にプロパティを追加してその関数をさらに拡張するというJavaScriptの慣例にも精通しているかもしれません。
+          TypeScriptは宣言マージを使用して、このような定義を型保証された方法で構築します。
+        </p>
+
+        <pre><code>function buildLabel(name: string): string {
+                return buildLabel.prefix + name + buildLabel.suffix;
+            }
+            
+            namespace buildLabel {
+                export let suffix = "";
+                export let prefix = "Hello, ";
+            }
+            
+            console.log(buildLabel("Sam Smith"));</code></pre>
+
+        <p>
+          Similarly, namespaces can be used to extend enums with static members:
+        </p>
+
+        <pre><code>enum Color {
+    red = 1,
+    green = 2,
+    blue = 4
+}
+
+namespace Color {
+    export function mixColor(colorName: string) {
+        if (colorName == "yellow") {
+            return Color.red + Color.green;
+        }
+        else if (colorName == "white") {
+            return Color.red + Color.green + Color.blue;
+        }
+        else if (colorName == "magenta") {
+            return Color.red + Color.blue;
+        }
+        else if (colorName == "cyan") {
+            return Color.green + Color.blue;
+        }
+    }
+}</code></pre>
+      </section>
+
+      <section>
+        <h3>Disallowed Merges</h3>
+
+        <p>
+          Not all merges are allowed in TypeScript. Currently, classes can not
+          merge with other classes or with variables. For information on
+          mimicking class merging, see the Mixins in TypeScript section.
+        </p>
+
+        <p>
+          TypeScriptではすべてのマージが許可されているわけではありません。
+          現在、クラスは他のクラスや変数とマージすることはできません。
+          クラスのマージを模倣する方法については、TypeScriptのMixinセクションを参照してください。
+        </p>
+      </section>
+
+      <section>
+        <h3>Module Augmentation</h3>
+        <p>
+          Although JavaScript modules do not support merging, you can patch
+          existing objects by importing and then updating them. Let’s look at a
+          toy Observable example:
+        </p>
+
+        <p>
+          JavaScriptモジュールはマージをサポートしませんが、既存のオブジェクトをインポートしてから更新することでパッチを適用できます。
+          おもちゃの観察可能な例を見てみましょう。
+        </p>
+
+        <pre><code>// observable.js
+export class Observable&lt;T&gt; {
+    // ... implementation left as an exercise for the reader ...
+}
+
+// map.js
+import { Observable } from "./observable";
+Observable.prototype.map = function (f) {
+    // ... another exercise for the reader
+}</code></pre>
+
+        <p>
+          This works fine in TypeScript too, but the compiler doesn’t know about
+          Observable.prototype.map. You can use module augmentation to tell the
+          compiler about it:
+        </p>
+        <p>
+          これはTypeScriptでもうまく機能しますが、コンパイラはObservable.prototype.mapについて知りません。
+          あなたはそれをコンパイラに伝えるためにモジュール拡張を使うことができます。
+        </p>
+        <pre><code>// observable.ts stays the same
+        // map.ts
+        import { Observable } from "./observable";
+        declare module "./observable" {
+            interface Observable&lt;T&gt; {
+                map&lt;U&gt;(f: (x: T) => U): Observable&lt;U&gt;;
+            }
+        }
+        Observable.prototype.map = function (f) {
+            // ... another exercise for the reader
+        }
+        
+        
+        // consumer.ts
+        import { Observable } from "./observable";
+        import "./map";
+        let o: Observable&lt;number&gt;;
+        o.map(x =&gt; x.toFixed());</code></pre>
+
+        <p>
+          The module name is resolved the same way as module specifiers in
+          import/export. See Modules for more information. Then the declarations
+          in an augmentation are merged as if they were declared in the same
+          file as the original.
+        </p>
+        <p>
+          モジュール名はインポート/エクスポートのモジュール指定子と同じ方法で解決されます。
+          詳しくはモジュールを参照してください。
+          それから、拡張の宣言は、あたかもそれらがオリジナルと同じファイルの中で宣言されたかのようにマージされます。
+        </p>
+        <p>
+          However, there are two limitations to keep in mind:
+          ただし、覚えておくべき2つの制限があります。
+        </p>
+
+        <ul>
+          <li>
+            You can’t declare new top-level declarations in the augmentation –
+            just patches to existing declarations.
+            拡張で新しいトップレベルの宣言を宣言することはできません - 既存の宣言にパッチを当てるだけです。
+          </li>
+          <li>
+            Default exports also cannot be augmented, only named exports (since
+            you need to augment an export by its exported name, and default is a
+            reserved word - see #14080 for details)
+            デフォルトのエクスポートも拡張することはできず、エクスポートと名付けるだけです（エクスポートをエクスポート名で拡張する必要があり、デフォルトは予約語です - 詳細は＃14080を参照してください） 
+          </li>
+        </ul>
+
+        <section>
+          <h3>Global augmentation</h3>
+          <p>
+            You can also add declarations to the global scope from inside a
+            module:
+          </p>
+          <p>
+            モジュールの内部からグローバルスコープに宣言を追加することもできます。
+          </p>
+
+<pre><code>// observable.ts
+export class Observable<T> {
+    // ... still no implementation ...
+}
+
+declare global {
+    interface Array<T> {
+        toObservable(): Observable<T>;
+    }
+}
+
+Array.prototype.toObservable = function () {
+    // ...
+}</code></pre>
+
+        </section>
+      </section>
+    </section>
+  </body>
+</html>
